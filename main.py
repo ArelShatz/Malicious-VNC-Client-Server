@@ -42,8 +42,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.saveWindow = SaveWin()
         self.saveWindow.setWindowIcon(QIcon("Gears.png"))
         self.saveWindow.setWindowTitle("Output")
-        self.
-        saveWindow.show()
+        self.saveWindow.show()
         """location = QFileDialog.getSaveFileName(self, "select file", self.defaultPath, "Video files (*.mp4)")[0]
         if not location:
             return
