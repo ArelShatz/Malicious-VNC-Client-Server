@@ -13,13 +13,6 @@ class UISettingsWin(QWidget):
         self.mainWin = MainWin
         
         self.verticalLayout = QVBoxLayout(self)
-        self.scrollArea = QScrollArea(self)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 480))
-        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout.addWidget(self.scrollArea)
 
         self.horizontalLayout = QHBoxLayout()
         self.themeText = QLabel("Theme: ")
@@ -27,11 +20,11 @@ class UISettingsWin(QWidget):
         self.themeCombo.addItems(["White (default)", "Dark", "Midnight"])
         self.horizontalLayout.addWidget(self.themeText)
         self.horizontalLayout.addWidget(self.themeCombo)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.fpsRadio = QRadioButton("show stream fps")
-        self.verticalLayout_2.addWidget(self.fpsRadio)
+        self.verticalLayout.addWidget(self.fpsRadio)
 
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
@@ -39,7 +32,7 @@ class UISettingsWin(QWidget):
         self.apply.setMaximumWidth(75)
         self.apply.clicked.connect(self.Apply)
         self.horizontalLayout.addWidget(self.apply, Qt.AlignCenter)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.setLayout(self.verticalLayout)
 
 

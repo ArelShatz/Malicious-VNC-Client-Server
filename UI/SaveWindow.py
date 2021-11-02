@@ -13,15 +13,7 @@ class SaveWin(QWidget):
         self.currentLocation = ""
         self.mainWin = MainWin
         
-        self.verticalLayout = QVBoxLayout(self)
-        self.scrollArea = QScrollArea(self)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 480))
-        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout.addWidget(self.scrollArea)
-        
+        self.verticalLayout = QVBoxLayout(self)     
         
         self.horizontalLayout = QHBoxLayout()
         self.dirLabel = QLabel("output file directory: ")
@@ -32,7 +24,7 @@ class SaveWin(QWidget):
         self.horizontalLayout.addWidget(self.dirLabel)
         self.horizontalLayout.addWidget(self.dirLine)
         self.horizontalLayout.addWidget(self.browse)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.horizontalLayout = QHBoxLayout()
         self.nameLabel = QLabel("output file name: ")
@@ -42,7 +34,7 @@ class SaveWin(QWidget):
         self.horizontalLayout.addWidget(self.nameLabel)
         self.horizontalLayout.addWidget(self.nameLine)
         self.horizontalLayout.addWidget(self.formatLabel)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
@@ -50,7 +42,7 @@ class SaveWin(QWidget):
         self.apply.setMaximumWidth(75)
         self.apply.clicked.connect(self.Apply)
         self.horizontalLayout.addWidget(self.apply, Qt.AlignCenter)
-        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.setLayout(self.verticalLayout)
 
 
@@ -76,9 +68,6 @@ class SaveWin(QWidget):
         location = QFileDialog.getExistingDirectory(None, "select directory", self.defaultPath, QFileDialog.ShowDirsOnly)
         if not location:
             return
-
-        """if location[-4] != ".":
-            location += ".mp4" """
 
         self.dirLine.text = location
         self.dirLine.setText(location)
