@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 import sys
 
 
-class TypeLineEdit(QLineEdit):
+class LockedLineEdit(QLineEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -12,4 +12,4 @@ class TypeLineEdit(QLineEdit):
         self.textEdited.connect(self.CheckText)
 
     def CheckText(self):
-        self.setText(self.text)
+        self.setText(self.text) #prevent the user from typing any text

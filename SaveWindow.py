@@ -2,15 +2,16 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from TypeLineEdit import TypeLineEdit
+from LineEdits import LockedLineEdit
 from os.path import exists, splitext, dirname, join
 
 
 class SaveWin(QWidget):
-    def __init__(self):
+    def __init__(self, MainWin):
         super().__init__()
         self.LoadDefaultPath()
         self.currentLocation = ""
+        self.mainWin = MainWin
         
         self.verticalLayout = QVBoxLayout(self)
         self.scrollArea = QScrollArea(self)
@@ -24,7 +25,7 @@ class SaveWin(QWidget):
         
         self.horizontalLayout = QHBoxLayout()
         self.dirLabel = QLabel("output file directory: ")
-        self.dirLine = TypeLineEdit()
+        self.dirLine = LockedLineEdit()
         self.browse = QPushButton("Browse...")
         self.browse.clicked.connect(self.selectDir)
         
@@ -55,18 +56,19 @@ class SaveWin(QWidget):
     #saves all of the changes
     @pyqtSlot()
     def Apply(self):
-        dir = self.nameDir.text()
+        dir = self.dirLine.text + "/"
         name = self.nameLine.text()
         ext = ".mp4"
-        path = join(dir, name, ext)
+        path = dir + name + ext
 
-        iteration = 1
+        iteration = 0
         while exists(path):
-            name = name + "(" + str(iteration) + ")"
-            location = join(dir, newName, ext)
             iteration += 1
+            name = name + "(" + str(iteration) + ")"
+            path = dir + name + ext
 
-        #do something
+        self.mainWin.outputFile = path
+        self.close()
 
 
     def selectDir(self):
@@ -96,12 +98,3 @@ class SaveWin(QWidget):
                 
             else:
                 self.defaultPath = "C:\\untitled.mp4"
-
-
-if __name__ == '__main__':
-    app = QApplication([])
-    window = SaveWin()
-    window.setWindowIcon(QIcon("Gears.png"))
-    window.setWindowTitle("output")
-    window.show()
-    app.exec_()
