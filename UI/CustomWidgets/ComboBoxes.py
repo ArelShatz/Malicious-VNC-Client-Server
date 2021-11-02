@@ -13,15 +13,21 @@ class SortedComboBox(QComboBox):
         self.currentIndexChanged.connect(self.ItemChanged)
 
     def ItemSelected(self, index):
+        buttonText = self.itemText(index)
         self.clear()
-        copy = self.originalItems.copy()
-        copy.insert(0, copy.pop(index))
-        self.addItems(copy)
+        self.addItem(buttonText)
+        self.addItems(self.originalItems)
 
     def ItemChanged(self):
-        if not self.originalItems:
-            items = []
-            for i in range(self.count()):
-                items.append(self.itemText(i))
+        if self.originalItems:
+            return
+            
+        items = []
+        for i in range(self.count()):
+            items.append(self.itemText(i))
 
-            self.originalItems = items
+        self.originalItems = items
+        firstButtonText = self.itemText(0)
+        self.clear()
+        self.addItem(firstButtonText)
+        self.addItems(self.originalItems)
