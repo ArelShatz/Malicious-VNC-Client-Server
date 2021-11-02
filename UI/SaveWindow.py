@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from LineEdits import LockedLineEdit
+from UI.CustomWidgets.LineEdits import LockedLineEdit
 from os.path import exists, splitext, dirname, join
 
 
@@ -47,11 +47,12 @@ class SaveWin(QWidget):
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
         self.apply = QPushButton("Apply")
-        self.apply.setMaximumWidth(100)
+        self.apply.setMaximumWidth(75)
         self.apply.clicked.connect(self.Apply)
         self.horizontalLayout.addWidget(self.apply, Qt.AlignCenter)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.setLayout(self.verticalLayout)
+
 
     #saves all of the changes
     @pyqtSlot()

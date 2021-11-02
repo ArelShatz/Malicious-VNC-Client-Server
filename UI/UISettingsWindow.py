@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from ComboBoxes import SortedComboBox
+from UI.CustomWidgets.ComboBoxes import SortedComboBox
 from os.path import exists, splitext, dirname, join
 
 
