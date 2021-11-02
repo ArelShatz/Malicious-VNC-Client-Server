@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtGui import QKeySequence, QIcon
+from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
 from main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
 
 from SaveWindow import SaveWin
+from Palettes import *
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -17,8 +18,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
         
-        self.LoadDefaultPath()
-        self.currentLocation = ""
+        self.outputFile = ""
 
     
     def pressedExitMsgBoxButton(self, button):
@@ -39,7 +39,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Save_To_triggered(self):
-        self.saveWindow = SaveWin()
+        self.saveWindow = SaveWin(self)
         self.saveWindow.setWindowIcon(QIcon("Gears.png"))
         self.saveWindow.setWindowTitle("Output")
         self.saveWindow.show()
@@ -63,23 +63,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.MemorizePath()"""
 
 
-    def MemorizePath(self):
-        with open("lastPath.txt", 'w') as pathFile:
-            pathFile.write(self.defaultPath)
-
-
-    def LoadDefaultPath(self):
-        with open("lastPath.txt", 'r') as pathFile:
-            lastPath = pathFile.read()
-            if lastPath:
-                self.defaultPath = lastPath
-                
-            else:
-                self.defaultPath = "C:\\untitled.mp4"
-
-
 if __name__ == '__main__':
     app = QApplication(argv)
+    app.setStyle('Fusion')
+    palette = DarkPalette()
+    app.setPalette(palette)
     window = Window()
     window.setWindowIcon(QIcon("Gears.png"))
     window.setWindowTitle("Remote Desktop Software")
