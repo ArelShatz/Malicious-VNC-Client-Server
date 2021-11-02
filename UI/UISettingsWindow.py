@@ -16,7 +16,7 @@ class UISettingsWin(QWidget):
         self.scrollArea = QScrollArea(self)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 380, 280))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 480))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
@@ -33,7 +33,19 @@ class UISettingsWin(QWidget):
         self.fpsRadio = QRadioButton("show stream fps")
         self.verticalLayout_2.addWidget(self.fpsRadio)
 
+        #add the apply button at the bottom of the window
+        self.horizontalLayout = QHBoxLayout()
+        self.apply = QPushButton("Apply")
+        self.apply.setMaximumWidth(75)
+        self.apply.clicked.connect(self.Apply)
+        self.horizontalLayout.addWidget(self.apply, Qt.AlignCenter)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.setLayout(self.verticalLayout)
+
+
+    def Apply(self):
+        selectedTheme = self.themeCombo.currentText()
+        self.mainWin.ChangeTheme(selectedTheme)
 
 
 if __name__ == '__main__':

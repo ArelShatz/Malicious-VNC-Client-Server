@@ -17,7 +17,7 @@ class SaveWin(QWidget):
         self.scrollArea = QScrollArea(self)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 380, 280))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 480))
         self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
