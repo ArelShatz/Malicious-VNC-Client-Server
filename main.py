@@ -62,37 +62,19 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Save_To_triggered(self):
-        self.saveWindow = SaveWin(self)
-        self.saveWindow.setWindowIcon(QIcon("Gears.png"))
-        self.saveWindow.setWindowTitle("Output")
-        self.saveWindow.show()
-        """location = QFileDialog.getSaveFileName(self, "select file", self.defaultPath, "Video files (*.mp4)")[0]
-        if not location:
-            return
+        self.OpenWin(SaveWin, "Select Output")
 
-        if location[-4] != ".":
-            location += ".mp4"
 
-        iteration = 1
-        dir = dirname(location)
-        base_name, ext = splitext(location)
-        while exists(location):
-            newName = base_name + "(" + str(iteration) + ")"
-            location = join(dir, newName, ext)
-            iteration += 1
-
-        self.currentLocation = location
-        self.defaultPath = location
-        self.MemorizePath()"""
+    @pyqtSlot()
+    def on_action_UI_triggered(self):
+        self.OpenWin(UISettingsWin, "Settings")
 
 
 if __name__ == '__main__':
     app = QApplication(argv)
     app.setStyle('Fusion')
-    palette = DarkPalette()
-    app.setPalette(palette)
-    window = Window()
-    window.setWindowIcon(QIcon("Gears.png"))
+    window = Window(app)
+    window.setWindowIcon(QIcon("remoteTrans.png"))
     window.setWindowTitle("Remote Desktop Software")
     window.show()
     app.exec_()
