@@ -8,20 +8,25 @@ from UI.SaveWindow import SaveWin
 from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
+palettes = {
+        "White (default)": WhitePalette,
+        "Dark": DarkPalette,
+        "Midnight": MidnightPalette
+    }
 
 class Window(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, App, parent=None):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
         self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
         self.closeShortcut.activated.connect(self.on_action_Exit_triggered)
-        
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
-        
         self.app = App
 
         self.outputFile = ""
+        self.theme = "White (default)"
+        self.showFps = False
 
     
     def pressedExitMsgBoxButton(self, button):
@@ -53,6 +58,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.msgBox.setDefaultButton(QMessageBox.No)
         self.msgBox.buttonClicked.connect(self.pressedExitMsgBoxButton)
         self.msgBox.exec_()
+
 
     @pyqtSlot()
     def on_action_Save_To_triggered(self):

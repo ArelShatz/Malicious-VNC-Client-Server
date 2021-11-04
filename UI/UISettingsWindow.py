@@ -16,7 +16,7 @@ class UISettingsWin(QWidget):
 
         self.horizontalLayout = QHBoxLayout()
         self.themeText = QLabel("Theme: ")
-        self.themeCombo = SortedComboBox()
+        self.themeCombo = SortedComboBox(self.mainWin.theme)
         self.themeCombo.addItems(["White (default)", "Dark", "Midnight"])
         self.horizontalLayout.addWidget(self.themeText)
         self.horizontalLayout.addWidget(self.themeCombo)
@@ -24,6 +24,7 @@ class UISettingsWin(QWidget):
 
         self.horizontalLayout = QHBoxLayout()
         self.fpsRadio = QRadioButton("show stream fps")
+        self.fpsRadio.setChecked(self.mainWin.showFps)
         self.verticalLayout.addWidget(self.fpsRadio)
 
         self.horizontalLayout = QHBoxLayout()
@@ -46,12 +47,5 @@ class UISettingsWin(QWidget):
     def Apply(self):
         selectedTheme = self.themeCombo.currentText()
         self.mainWin.ChangeTheme(selectedTheme)
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    app.setStyle("Fusion")
-    window = UISettingsWin()
-    window.setWindowTitle("Remote Desktop Software")
-    window.show()
-    app.exec_()
+        self.mainWin.showFps = self.fpsRadio.isChecked()
+        self.close()

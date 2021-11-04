@@ -5,9 +5,10 @@ import sys
 
 
 class SortedComboBox(QComboBox):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, savedVal, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.saved = savedVal
         self.originalItems = []
         self.activated.connect(self.ItemSelected)
         self.currentIndexChanged.connect(self.ItemChanged)
@@ -21,13 +22,14 @@ class SortedComboBox(QComboBox):
     def ItemChanged(self):
         if self.originalItems:
             return
-            
+        
+        #only gets here on the initial items addition
         items = []
         for i in range(self.count()):
             items.append(self.itemText(i))
 
         self.originalItems = items
-        firstButtonText = self.itemText(0)
+        firstButtonText = self.saved
         self.clear()
         self.addItem(firstButtonText)
         self.addItems(self.originalItems)
