@@ -29,7 +29,7 @@ class Window(QMainWindow, Ui_MainWindow):
         tempTheme = self.settingsDict["theme"]
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
-        
+
 
     def pressedExitMsgBoxButton(self, button):
         self.msgBox.close()
@@ -53,7 +53,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def SaveToJson(self):
         with open('config.json', 'w') as conf:
-            json.dump(self.settingsDict, conf)
+            json.dump(self.settingsDict, conf, indent=0)
 
 
     def ReadFromJson(self):
