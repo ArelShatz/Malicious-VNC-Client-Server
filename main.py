@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
-from main_window_ui import Ui_MainWindow
+from UI.main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
 
-from SaveWindow import SaveWin
-from Palettes import *
+from UI.SaveWindow import SaveWin
+from UI.UISettingsWindow import UISettingsWin
+from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
 
 class Window(QMainWindow, Ui_MainWindow):
@@ -27,6 +28,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.msgBox.close()
         if button.text() == "&Yes":
             self.close()
+
+
+    def OpenWin(self, Win, name):
+        self.win = Win(self)
+        self.win.setWindowIcon(QIcon("Gears.png"))
+        self.win.setWindowTitle(name)
+        self.win.show()
 
 
     def ChangeTheme(self, paletteName):

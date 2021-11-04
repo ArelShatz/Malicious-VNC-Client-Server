@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from LineEdits import LockedLineEdit
+from CustomWidgets.LineEdits import LockedLineEdit
 
 
 class ConnWin(QWidget):
