@@ -16,7 +16,7 @@ class UISettingsWin(QWidget):
 
         self.horizontalLayout = QHBoxLayout()
         self.themeText = QLabel("Theme: ")
-        self.themeCombo = SortedComboBox(self.mainWin.theme)
+        self.themeCombo = SortedComboBox(self.mainWin.settingsDict["theme"])
         self.themeCombo.addItems(["White (default)", "Dark", "Midnight"])
         self.horizontalLayout.addWidget(self.themeText)
         self.horizontalLayout.addWidget(self.themeCombo)
@@ -24,7 +24,7 @@ class UISettingsWin(QWidget):
 
         self.horizontalLayout = QHBoxLayout()
         self.fpsRadio = QRadioButton("show stream fps")
-        self.fpsRadio.setChecked(self.mainWin.showFps)
+        self.fpsRadio.setChecked(self.mainWin.settingsDict["showFps"])
         self.verticalLayout.addWidget(self.fpsRadio)
 
         self.horizontalLayout = QHBoxLayout()
@@ -33,7 +33,7 @@ class UISettingsWin(QWidget):
         self.space.setMinimumHeight(50)
         self.horizontalLayout.addWidget(self.space)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        
+
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
         self.apply = QPushButton("Apply")
@@ -47,5 +47,6 @@ class UISettingsWin(QWidget):
     def Apply(self):
         selectedTheme = self.themeCombo.currentText()
         self.mainWin.ChangeTheme(selectedTheme)
-        self.mainWin.showFps = self.fpsRadio.isChecked()
+        self.mainWin.settingsDict["showFps"] = self.fpsRadio.isChecked()
+        self.mainWin.SaveToJson()
         self.close()

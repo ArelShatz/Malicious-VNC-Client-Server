@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
 from UI.main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
+import json
 
 from UI.SaveWindow import SaveWin
 from UI.UISettingsWindow import UISettingsWin
@@ -24,11 +25,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
         self.app = App
 
-        self.outputFile = ""
-        self.theme = "White (default)"
-        self.showFps = False
+        self.settingsDict = self.ReadFromJson()
+        tempTheme = self.settingsDict["theme"]
+        self.settingsDict["theme"] = "White (default)"
+        self.ChangeTheme(tempTheme)
+        
 
-    
     def pressedExitMsgBoxButton(self, button):
         self.msgBox.close()
         if button.text() == "&Yes":
@@ -43,10 +45,20 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def ChangeTheme(self, paletteName):
-        if self.theme != paletteName:
+        if self.settingsDict["theme"] != paletteName:
             paletteObj = palettes[paletteName]()
-            self.theme = paletteName
+            self.settingsDict["theme"] = paletteName
             self.app.setPalette(paletteObj)
+
+
+    def SaveToJson(self):
+        with open('config.json', 'w') as conf:
+            json.dump(self.settingsDict, conf)
+
+
+    def ReadFromJson(self):
+        with open('config.json', 'r') as conf:
+            return json.load(conf)
 
 
     @pyqtSlot()

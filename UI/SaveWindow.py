@@ -18,7 +18,7 @@ class SaveWin(QWidget):
         self.horizontalLayout = QHBoxLayout()
         self.dirLabel = QLabel("output file directory: ")
         self.dirLine = LockedLineEdit()
-        self.dirLine.setText(DirOf(self.mainWin.outputFile))
+        self.dirLine.setText(DirOf(self.mainWin.settingsDict["outputFile"]))
         self.browse = QPushButton("Browse...")
         self.browse.clicked.connect(self.selectDir)
         
@@ -30,7 +30,7 @@ class SaveWin(QWidget):
         self.horizontalLayout = QHBoxLayout()
         self.nameLabel = QLabel("output file name: ")
         self.nameLine = QLineEdit()
-        self.nameLine.setText(basename(self.mainWin.outputFile).split('.')[0])
+        self.nameLine.setText(basename(self.mainWin.settingsDict["outputFile"]).split('.')[0])
         self.formatLabel = QLabel(".mp4")
 
         self.horizontalLayout.addWidget(self.nameLabel)
@@ -70,7 +70,8 @@ class SaveWin(QWidget):
             name = name + "(" + str(iteration) + ")"
             path = dir + name + ext
 
-        self.mainWin.outputFile = path
+        self.mainWin.settingsDict["outputFile"] = path
+        self.mainWin.SaveToJson()
         self.close()
 
 
