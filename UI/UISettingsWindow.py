@@ -26,6 +26,13 @@ class UISettingsWin(QWidget):
         self.fpsRadio = QRadioButton("show stream fps")
         self.verticalLayout.addWidget(self.fpsRadio)
 
+        self.horizontalLayout = QHBoxLayout()
+        self.space = QWidget()
+        self.space.setMinimumWidth(50)
+        self.space.setMinimumHeight(50)
+        self.horizontalLayout.addWidget(self.space)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
         self.apply = QPushButton("Apply")

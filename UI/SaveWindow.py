@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from UI.CustomWidgets.LineEdits import LockedLineEdit
-from os.path import exists, splitext, dirname, join
+from os.path import exists, splitext, dirname, join, basename
 
 
 class SaveWin(QWidget):
@@ -36,12 +36,20 @@ class SaveWin(QWidget):
         self.horizontalLayout.addWidget(self.formatLabel)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
+        self.horizontalLayout = QHBoxLayout()
+        self.space = QWidget()
+        self.space.setMinimumWidth(50)
+        self.space.setMinimumHeight(50)
+        self.horizontalLayout.addWidget(self.space)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+
         #add the apply button at the bottom of the window
         self.horizontalLayout = QHBoxLayout()
         self.apply = QPushButton("Apply")
         self.apply.setMaximumWidth(75)
         self.apply.clicked.connect(self.Apply)
-        self.horizontalLayout.addWidget(self.apply, Qt.AlignCenter)
+        self.horizontalLayout.addWidget(self.apply)
+        self.horizontalLayout.setAlignment(self.apply, Qt.AlignRight)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.setLayout(self.verticalLayout)
 
