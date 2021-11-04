@@ -18,6 +18,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
         
+        self.app = App
+
         self.outputFile = ""
 
     
@@ -25,6 +27,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.msgBox.close()
         if button.text() == "&Yes":
             self.close()
+
+
+    def ChangeTheme(self, paletteName):
+        if self.theme != paletteName:
+            paletteObj = palettes[paletteName]()
+            self.theme = paletteName
+            self.app.setPalette(paletteObj)
 
 
     @pyqtSlot()
