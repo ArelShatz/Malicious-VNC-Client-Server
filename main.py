@@ -15,6 +15,13 @@ palettes = {
         "Midnight": MidnightPalette
     }
 
+
+defaultSettings = {
+                "outputFile": "",
+                "theme": "White (default)",
+                "showFps": False
+            }
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, App, parent=None):
         super().__init__(parent)
@@ -52,13 +59,24 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def SaveToJson(self):
-        with open('config.json', 'w') as conf:
-            json.dump(self.settingsDict, conf, indent=0)
+        conf = open('config.json', 'w')
+        json.dump(self.settingsDict, conf, indent=0)
+        conf.close()
 
 
     def ReadFromJson(self):
-        with open('config.json', 'r') as conf:
-            return json.load(conf)
+        try:
+            conf = open('config.json', 'r')
+            settings = json.load(conf)
+            conf.close()
+
+        except (FileNotFoundError, json.decoder.JSONDecodeError):   #if config file does not exists/is empty/is corrupted, create a black file and load the default settings
+            conf = open('config.json', 'w')
+            conf.close()
+            settings = defaultSettings
+
+        finally:
+            return settings
 
 
     @pyqtSlot()
