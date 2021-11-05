@@ -27,21 +27,17 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
         self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
-        self.closeShortcut.activated.connect(self.on_action_Exit_triggered)
+        self.closeShortcut.activated.connect(self.close)
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
+
         self.app = App
+        self.app.aboutToQuit.connect(self.closeEvent)
 
         self.settingsDict = self.ReadFromJson()
         tempTheme = self.settingsDict["theme"]
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
-
-
-    def pressedExitMsgBoxButton(self, button):
-        self.msgBox.close()
-        if button.text() == "&Yes":
-            self.close()
 
 
     def OpenWin(self, Win, name):
@@ -79,15 +75,24 @@ class Window(QMainWindow, Ui_MainWindow):
             return settings
 
 
-    @pyqtSlot()
-    def on_action_Exit_triggered(self):
+    def closeEvent(self, event):
         self.msgBox = QMessageBox()
         self.msgBox.setText("are you sure you want to exit?")
         self.msgBox.setWindowTitle("Quit")
         self.msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
         self.msgBox.setDefaultButton(QMessageBox.No)
-        self.msgBox.buttonClicked.connect(self.pressedExitMsgBoxButton)
-        self.msgBox.exec_()
+        reply = self.msgBox.exec_()
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+
+        else:
+            event.ignore()
+
+
+    @pyqtSlot()
+    def on_action_Exit_triggered(self):
+        self.close()
 
 
     @pyqtSlot()
