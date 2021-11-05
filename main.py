@@ -27,10 +27,12 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
         self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
-        self.closeShortcut.activated.connect(self.on_action_Exit_triggered)
+        self.closeShortcut.activated.connect(self.close)
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
+
         self.app = App
+        self.app.aboutToQuit.connect(self.closeEvent)
 
         self.settingsDict = self.ReadFromJson()
         tempTheme = self.settingsDict["theme"]
@@ -38,14 +40,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ChangeTheme(tempTheme)
 
 
-    def pressedExitMsgBoxButton(self, button):
-        self.msgBox.close()
-        if button.text() == "&Yes":
-            self.close()
-
-
     def OpenWin(self, Win, name):
         self.win = Win(self)
+        self.win.setAttribute(Qt.WA_DeleteOnClose)
         self.win.setWindowIcon(QIcon("Gears.png"))
         self.win.setWindowTitle(name)
         self.win.show()
@@ -79,15 +76,25 @@ class Window(QMainWindow, Ui_MainWindow):
             return settings
 
 
-    @pyqtSlot()
-    def on_action_Exit_triggered(self):
+    def closeEvent(self, event):
         self.msgBox = QMessageBox()
+        self.msgBox.setAttribute(Qt.WA_DeleteOnClose)
         self.msgBox.setText("are you sure you want to exit?")
         self.msgBox.setWindowTitle("Quit")
         self.msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
         self.msgBox.setDefaultButton(QMessageBox.No)
-        self.msgBox.buttonClicked.connect(self.pressedExitMsgBoxButton)
-        self.msgBox.exec_()
+        reply = self.msgBox.exec_()
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+
+        else:
+            event.ignore()
+
+
+    @pyqtSlot()
+    def on_action_Exit_triggered(self):
+        self.close()
 
 
     @pyqtSlot()
@@ -104,8 +111,10 @@ if __name__ == '__main__':
     app = QApplication(argv)
     app.setStyle('Fusion')
     window = Window(app)
+    window.setAttribute(Qt.WA_DeleteOnClose)
     window.setWindowIcon(QIcon("remoteTrans.png"))
     window.setWindowTitle("Remote Desktop Software")
     window.show()
     app.exec_()
+    print('\n'.join(repr(w) for w in app.allWidgets()))
     sysExit()
