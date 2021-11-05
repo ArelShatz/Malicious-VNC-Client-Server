@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
 from UI.main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
-import json
+from json import load, dump, decoder
 
 from UI.SaveWindow import SaveWin
 from UI.UISettingsWindow import UISettingsWin
@@ -60,17 +60,17 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def SaveToJson(self):
         conf = open('config.json', 'w')
-        json.dump(self.settingsDict, conf, indent=0)
+        dump(self.settingsDict, conf, indent=0)
         conf.close()
 
 
     def ReadFromJson(self):
         try:
             conf = open('config.json', 'r')
-            settings = json.load(conf)
+            settings = load(conf)
             conf.close()
 
-        except (FileNotFoundError, json.decoder.JSONDecodeError):   #if config file does not exists/is empty/is corrupted, create a black file and load the default settings
+        except (FileNotFoundError, decoder.JSONDecodeError):   #if config file does not exists/is empty/is corrupted, create a black file and load the default settings
             conf = open('config.json', 'w')
             conf.close()
             settings = defaultSettings
