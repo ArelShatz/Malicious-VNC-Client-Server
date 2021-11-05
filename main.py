@@ -27,7 +27,7 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
         self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
-        self.closeShortcut.activated.connect(self.close)
+        self.closeShortcut.activated.connect(self.close)    #fire the close event
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
 
@@ -80,6 +80,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.msgBox = QMessageBox()
         self.msgBox.setAttribute(Qt.WA_DeleteOnClose)
         self.msgBox.setText("are you sure you want to exit?")
+        self.msgBox.setWindowIcon(QIcon("Gears.png"))
         self.msgBox.setWindowTitle("Quit")
         self.msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
         self.msgBox.setDefaultButton(QMessageBox.No)
@@ -94,7 +95,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Exit_triggered(self):
-        self.close()
+        self.close()    #fire the close event
 
 
     @pyqtSlot()
