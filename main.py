@@ -42,6 +42,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def OpenWin(self, Win, name):
         self.win = Win(self)
+        self.win.setAttribute(Qt.WA_DeleteOnClose)
         self.win.setWindowIcon(QIcon("Gears.png"))
         self.win.setWindowTitle(name)
         self.win.show()
@@ -77,6 +78,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event):
         self.msgBox = QMessageBox()
+        self.msgBox.setAttribute(Qt.WA_DeleteOnClose)
         self.msgBox.setText("are you sure you want to exit?")
         self.msgBox.setWindowTitle("Quit")
         self.msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
@@ -109,8 +111,10 @@ if __name__ == '__main__':
     app = QApplication(argv)
     app.setStyle('Fusion')
     window = Window(app)
+    window.setAttribute(Qt.WA_DeleteOnClose)
     window.setWindowIcon(QIcon("remoteTrans.png"))
     window.setWindowTitle("Remote Desktop Software")
     window.show()
     app.exec_()
+    print('\n'.join(repr(w) for w in app.allWidgets()))
     sysExit()
