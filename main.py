@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSlot, QState
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
 from UI.main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
@@ -34,7 +34,10 @@ class Window(QMainWindow, Ui_MainWindow):
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
 
         self.fullscreenShortcut = QShortcut('F11', self)
-        self.fullscreenShortcut.activated.connect(self.ToggleFullscreen)
+        self.fullscreenShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() ^ Qt.WindowFullScreen))  #apply the opposite of the current fullscreen state
+
+        self.fullscreenExitShortcut = QShortcut('ESC', self)
+        self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #exit out of fullscreen
 
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
@@ -45,10 +48,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ChangeTheme(tempTheme)
 
 
-    def ToggleFullscreen(self):
-        doFullscreen = self.windowState() ^ Qt.WindowFullScreen
-        self.setWindowState(doFullscreen);
-        self.menubar.setHidden(doFullscreen)
+    def ToggleFullscreen(self, newState):
+        self.setWindowState(newState);
+        self.menubar.setHidden(newState)
 
 
     def OpenWin(self, Win, name):
