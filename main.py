@@ -34,7 +34,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
 
-        self.settingsDict = self.ReadFromJson()
+        self.settingsDict = self.ReadFromJson()     #load the saved settings
         tempTheme = self.settingsDict["theme"]
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
@@ -67,8 +67,9 @@ class Window(QMainWindow, Ui_MainWindow):
             settings = load(conf)
             conf.close()
 
-        except (FileNotFoundError, decoder.JSONDecodeError):   #if config file does not exists/is empty/is corrupted, create a black file and load the default settings
+        except (FileNotFoundError, decoder.JSONDecodeError):   #if config file does not exists/is empty/is corrupted, create a default save file and load the default settings
             conf = open('config.json', 'w')
+            dump(defaultSettings, conf, indent=0)
             conf.close()
             settings = defaultSettings
 
