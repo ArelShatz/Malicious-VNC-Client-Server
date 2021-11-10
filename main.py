@@ -26,10 +26,15 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, App, parent=None):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
+
         self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
         self.closeShortcut.activated.connect(self.close)    #fire the close event
+
         self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
         self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
+
+        self.fullscreenShortcut = QShortcut('F11', self)
+        self.fullscreenShortcut.activated.connect(self.ToggleFullscreen)
 
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
@@ -38,6 +43,12 @@ class Window(QMainWindow, Ui_MainWindow):
         tempTheme = self.settingsDict["theme"]
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
+
+
+    def ToggleFullscreen(self):
+        doFullscreen = self.windowState() ^ Qt.WindowFullScreen
+        self.setWindowState(doFullscreen);
+        self.menubar.setHidden(doFullscreen)
 
 
     def OpenWin(self, Win, name):
