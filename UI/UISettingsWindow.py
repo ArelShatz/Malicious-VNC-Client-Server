@@ -9,7 +9,6 @@ from os.path import exists, splitext, dirname, join
 class UISettingsWin(QWidget):
     def __init__(self, MainWin):
         super().__init__()
-        self.currentLocation = ""
         self.mainWin = MainWin
         
         self.verticalLayout = QVBoxLayout(self)

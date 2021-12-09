@@ -6,17 +6,19 @@ from CustomWidgets.LineEdits import LockedLineEdit
 
 
 class ConnWin(QWidget):
-    def __init__(self):
+    def __init__(self, MainWin):
         super().__init__()
+        self.mainWin = MainWin
 
         self.verticalLayout = QVBoxLayout(self)
-        self.scrollArea = QScrollArea(self)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 380, 280))
-        self.verticalLayout_2 = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout.addWidget(self.scrollArea)
+
+        self.horizontalLayout = QHBoxLayout()
+        self.themeText = QLabel("Theme: ")
+        self.themeCombo = SortedComboBox()
+        self.themeCombo.addItems(["White (default)", "Dark", "Midnight"])
+        self.horizontalLayout.addWidget(self.themeText)
+        self.horizontalLayout.addWidget(self.themeCombo)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         
 
 

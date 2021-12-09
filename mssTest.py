@@ -12,8 +12,8 @@ monitor = sct.monitors[1]
 frameCounter = 0
 frameSum = 0
 iterations = 1000
-#minFrameDelta = 0.03333
-minFrameDelta = 0.041666
+minFrameDelta = 0.03333
+#minFrameDelta = 0.041666
 estimate = 0.01
 
 
@@ -49,7 +49,7 @@ def SendVideoStream():
         frameEnd = time.perf_counter()
         frameTimeElapsed = frameEnd - frameStart
         #print(abs(minFrameDelta - frameTimeElapsed))
-        SpinLock(minFrameDelta - frameTimeElapsed)
+        halt(minFrameDelta - frameTimeElapsed)
         frameWaitPeriodEnd = time.perf_counter()
         frameSum += frameWaitPeriodEnd - frameStart
         #print(frameWaitPeriodEnd - frameStart)

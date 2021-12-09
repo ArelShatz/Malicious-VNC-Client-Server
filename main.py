@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton
 from PyQt5.QtCore import Qt, pyqtSlot, QState
-from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor
+from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor, QImage
 from UI.main_window_ui import Ui_MainWindow
 from sys import argv, exit as sysExit
 from json import load, dump, decoder
@@ -8,6 +8,7 @@ from json import load, dump, decoder
 from UI.SaveWindow import SaveWin
 from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
+
 
 palettes = {
         "White (default)": WhitePalette,
@@ -22,22 +23,19 @@ defaultSettings = {
                 "showFps": False
             }
 
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, App, parent=None):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compied .ui file
 
-        self.closeShortcut = QShortcut(QKeySequence('Ctrl+Q'), self)
-        self.closeShortcut.activated.connect(self.close)    #fire the close event
-
-        self.saveShortcut = QShortcut(QKeySequence('Ctrl+S'), self)
-        self.saveShortcut.activated.connect(self.on_action_Save_To_triggered)
-
-        self.fullscreenShortcut = QShortcut('F11', self)
-        self.fullscreenShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() ^ Qt.WindowFullScreen))  #apply the opposite of the current fullscreen state
+        self.addAction(self.action_Save_To)
+        self.addAction(self.action_UI)
+        self.addAction(self.action_Exit)
+        self.addAction(self.action_Fullscreen)
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
-        self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #exit out of fullscreen
+        self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #change 3rd bit (fullscreen flag) to 0 (XXXX & 1011(11) = X0XX)
 
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
@@ -47,10 +45,17 @@ class Window(QMainWindow, Ui_MainWindow):
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
 
+        self.label.setHidden(False)
+        self.label.updateBuffer(QImage("Gears.png"))
+
 
     def ToggleFullscreen(self, newState):
         self.setWindowState(newState);
         self.menubar.setHidden(newState)
+
+
+    def OpenConnWin(self):
+        self.OpenWin(ConnectionWindow, "Connection Manager")
 
 
     def OpenWin(self, Win, name):
@@ -120,6 +125,11 @@ class Window(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_action_UI_triggered(self):
         self.OpenWin(UISettingsWin, "Settings")
+
+
+    @pyqtSlot()
+    def on_action_Fullscreen_triggered(self):
+        self.ToggleFullscreen(self.windowState() ^ Qt.WindowFullScreen)
 
 
 if __name__ == '__main__':

@@ -2,24 +2,58 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>787</width>
+    <height>563</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="DisplayBuffer" name="label">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>787</width>
      <height>21</height>
     </rect>
    </property>
@@ -34,6 +68,7 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="action_Fullscreen"/>
    </widget>
    <widget class="QMenu" name="menuFIle">
     <property name="title">
@@ -68,10 +103,16 @@
    <property name="text">
     <string>&amp;Exit</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
   </action>
   <action name="action_Save_To">
    <property name="text">
     <string>&amp;Save To...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="action_Connect_2">
@@ -93,6 +134,9 @@
    <property name="text">
     <string>&amp;UI...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
   </action>
   <action name="action_Start_Recording">
    <property name="text">
@@ -108,7 +152,22 @@
     <string>&amp;Stop Recording</string>
    </property>
   </action>
+  <action name="action_Fullscreen">
+   <property name="text">
+    <string>&amp;Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>F11</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DisplayBuffer</class>
+   <extends>QLabel</extends>
+   <header>UI.CustomWidgets.DisplayBuffer</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
