@@ -1,4 +1,4 @@
-import time
+"""import time
 import numpy as np
 import cv2
 import mss.windows
@@ -62,7 +62,7 @@ def SendVideoStream():
     cv2.destroyAllWindows()
 
 videoThread = Thread(target=SendVideoStream)
-videoThread.start()
+videoThread.start()"""
 
 """import mss
 import mss.tools
@@ -92,3 +92,47 @@ with mss() as sct:
     rawBGR = numpy.array(img, dtype=numpy.uint8)[:, :, :3].tobytes()
     print(len(rawBGR))
     UDPClientSock.send(rawBGR[:65507])"""
+
+
+from vidgear.gears import ScreenGear
+import cv2
+import time
+
+estimate = 0.01
+
+
+def SpinLock(seconds):
+    end = 0
+    start = time.perf_counter()
+    while end - start < seconds:
+        end = time.perf_counter()
+        
+    return
+
+    #print("fps: " + str(round(1/(end - start))))
+
+
+
+stream = ScreenGear().start()
+minFrameDelta = 0.016666
+
+while True:
+    
+    frameStart = time.perf_counter()
+    frame = stream.read()
+
+
+    #cv2.imshow("Output Frame", frame)
+    frameEnd = time.perf_counter()
+    #print(frameEnd - frameStart)
+    diff = frameEnd - frameStart
+    halt(minFrameDelta - diff)
+    frameEndEnd = time.perf_counter()
+    print(1/ (frameEndEnd - frameStart))
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        break
+
+
+cv2.destroyAllWindows()
+stream.stop()
