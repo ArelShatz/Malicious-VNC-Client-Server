@@ -95,10 +95,11 @@ with mss() as sct:
 
 
 from vidgear.gears import ScreenGear
+from vidgear.gears import NetGear
 import cv2
 import time
+import numpy
 
-estimate = 0.01
 
 
 def SpinLock(seconds):
@@ -112,23 +113,35 @@ def SpinLock(seconds):
     #print("fps: " + str(round(1/(end - start))))
 
 
+def halt(seconds):
+    while seconds > estimate:
+        start = time.perf_counter()
+        time.sleep(0.001)
+        end = time.perf_counter()
+        seconds -= (end - start)
 
-stream = ScreenGear().start()
-minFrameDelta = 0.016666
+    SpinLock(seconds)
 
+minFrameDelta = 0.01666
+estimate = 0.01
+
+server = NetGear()
+stream = ScreenGear(monitor = 2, colorspace = None, logging = True).start()
 while True:
     
     frameStart = time.perf_counter()
     frame = stream.read()
 
+    frame = numpy.array(frame, dtype=numpy.uint8)
+    frame = numpy.flip(frame[:, :, :3], 2)
+    server.send(frame)
 
-    #cv2.imshow("Output Frame", frame)
     frameEnd = time.perf_counter()
-    #print(frameEnd - frameStart)
-    diff = frameEnd - frameStart
-    halt(minFrameDelta - diff)
-    frameEndEnd = time.perf_counter()
-    print(1/ (frameEndEnd - frameStart))
+    frameTimeElapsed = frameEnd - frameStart
+    halt(minFrameDelta - frameTimeElapsed)
+    #cv2.imshow("frame", frame)
+    #frameWaitPeriodEnd = time.perf_counter()
+    #print(1 / (frameWaitPeriodEnd - frameStart))
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
         break
@@ -136,3 +149,5 @@ while True:
 
 cv2.destroyAllWindows()
 stream.stop()
+server.close()
+
