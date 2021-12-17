@@ -14,25 +14,29 @@ def halt(seconds):
     return
 
 CHUNK = 65536
-UDPClientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+UDPClientSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 UDPClientSock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, CHUNK)
-#UDPClientSock.connect(("127.0.0.1", 9999))
+UDPClientSock.connect(("127.0.0.1", 9999))
 done = False
 iteration = 1
 
 sct = mss.mss()
-img = sct.grab(sct.monitors[1])
+mainMonitor = sct.monitors[1]
+img = sct.grab(mainMonitor)
 buffer = zlib.compress(img.rgb)
-print(len(buffer))
 
+shape = (str(mainMonitor["width"]) + "," + str(mainMonitor["height"])).encode()
+size = (str(len(buffer)) + ",").encode()
 
-#print(str(len(img.rgb)).encode())
-UDPClientSock.sendto(str(len(buffer)).encode(), ("127.0.0.1", 9999))
+#UDPClientSock.sendto(size + shape, ("127.0.0.1", 9999))
+UDPClientSock.send(size + shape)
 s = time.perf_counter()
 while buffer != b'':
     iteration += 1
-    UDPClientSock.sendto(buffer[:CHUNK - 29], ("127.0.0.1", 9999))
-    buffer = buffer[CHUNK-29:]
+    #UDPClientSock.sendto(buffer[:CHUNK - 29], ("127.0.0.1", 9999))
+    #buffer = buffer[CHUNK-29:]
+    UDPClientSock.send(buffer[:CHUNK])
+    buffer = buffer[CHUNK:]
 
 e = time.perf_counter()
 print(e - s)

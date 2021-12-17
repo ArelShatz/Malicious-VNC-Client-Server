@@ -14,26 +14,27 @@ def halt(seconds):
     return
 
 CHUNK = 65536
-UDPServerSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+UDPServerSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 UDPServerSock.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, CHUNK)
 UDPServerSock.bind(("127.0.0.1", 9999))
 data = 'a'
 buffer = b''
 
-#UDPServerSock.listen()
+UDPServerSock.listen()
 
-#conn, addr = UDPServerSock.accept()
-#length = int(conn.recv(8).decode())
-length = int(UDPServerSock.recvfrom(8).decode())[0]
-print(length)
+conn, addr = UDPServerSock.accept()
+metaData = conn.recv(1024).decode()
+#metaData = int(UDPServerSock.recvfrom(1024).decode())[0]
+size, width, height = metaData.split(",")
+size = int(size)
 
-while len(buffer) < length:
-    #data = conn.recv(CHUNK)
-    data = UDPServerSock.recvfrom(CHUNK if length - len(buffer) >= CHUNK else length - len(buffer))[0]
+
+while len(buffer) < size:
+    data = conn.recv(CHUNK if size - len(buffer) >= CHUNK else size - len(buffer))
+    #data = UDPServerSock.recvfrom(CHUNK if length - len(buffer) >= CHUNK else length - len(buffer))[0]
     buffer += data
-    print(len(buffer))
 
-RGB = numpy.array(Image.frombytes("RGB", (1600, 1200), zlib.decompress(buffer)))
+RGB = numpy.array(Image.frombytes("RGB", (int(width), int(height)), zlib.decompress(buffer)))
 #RGB = numpy.delete(RGB[0][0], 0)
 cv2.imshow("stream", RGB)
 """with open("test.txt", 'wb') as f:
