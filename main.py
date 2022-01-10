@@ -1,8 +1,11 @@
+from sys import argv, exit as sysExit
+import sys
+sys.path.append(sys.path[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
+
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton
 from PyQt5.QtCore import Qt, pyqtSlot, QState
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor, QImage
 from UI.main_window_ui import Ui_MainWindow
-from sys import argv, exit as sysExit
 from json import load, dump, decoder
 
 from UI.SaveWindow import SaveWin
