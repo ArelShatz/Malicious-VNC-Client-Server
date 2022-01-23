@@ -21,6 +21,7 @@ limitations under the License.
 import os
 import cv2
 import time
+import zlib
 import string
 import secrets
 import numpy as np
@@ -214,6 +215,9 @@ class NetGear:
         self.__jpeg_compression_fastupsample = False  # fastupsample off by default
         self.__jpeg_compression_colorspace = "BGR"  # use BGR colorspace by default
 
+        self.__rle_compression = False
+        self.__rle_compression__strength = 6
+
         # defines frame compression on return data
         self.__ex_compression_params = None
 
@@ -372,6 +376,15 @@ class NetGear:
             elif key == "jpeg_compression_fastupsample" and isinstance(value, bool):
                 # enable jpeg  fastupsample
                 self.__jpeg_compression_fastupsample = value
+
+            elif key == "rle_compression" and isinstance(value, bool):
+                # enable rle compression
+                self.__rle_compression = value
+
+
+            elif key == "rle_compression_strength" and isinstance(value, int):
+                # set rle compression strength
+                self.__rle_compression_strength = value
 
             # assign maximum retries in synchronous patterns
             elif key == "max_retries" and isinstance(value, int) and pattern < 2:
@@ -1067,6 +1080,9 @@ class NetGear:
                                     fastdct=self.__jpeg_compression_fastdct,
                                 )
 
+                        if self.__rle_compression:
+                            return_data = zlib.compress(return_data, self.__rle_compression_strength)
+
                         return_dict = (
                             dict() if self.__bi_mode else dict(port=self.__port)
                         )
@@ -1149,6 +1165,8 @@ class NetGear:
                 frame_buffer = np.frombuffer(msg_data, dtype=msg_json["dtype"])
                 frame = frame_buffer.reshape(msg_json["shape"])
 
+            if msg_json["rle"]:
+                frame = zlib.decompress(frame)
             # check if multiserver_mode
             if self.__multiserver_mode:
                 # save the unique port addresses
@@ -1264,6 +1282,9 @@ class NetGear:
                     fastdct=self.__jpeg_compression_fastdct,
                 )
 
+        if self.__rle_compression:
+            frame = zlib.compress(frame, self.__rle_compression_strength)
+
         # check if multiserver_mode is activated and assign values with unique port
         msg_dict = dict(port=self.__port) if self.__multiserver_mode else dict()
 
@@ -1277,6 +1298,11 @@ class NetGear:
                     "colorspace": self.__jpeg_compression_colorspace,
                 }
                 if self.__jpeg_compression
+                else False,
+                rle={
+                    "strength": self.__rle_compression_strength,
+                }
+                if self.__rle_compression
                 else False,
                 message=message,
                 pattern=str(self.__pattern),
@@ -1395,6 +1421,10 @@ class NetGear:
                         recvd_data = np.frombuffer(
                             recv_array, dtype=recv_json["array_dtype"]
                         ).reshape(recv_json["array_shape"])
+
+                    if msg_json["rle"]:
+                        recvd_data = zlib.decompress(recvd_data)
+                        
                 else:
                     recvd_data = recv_json["data"]
 
