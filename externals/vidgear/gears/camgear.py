@@ -44,6 +44,7 @@ logger.setLevel(log.DEBUG)
 
 yt_dlp = import_dependency_safe("yt_dlp", error="silent")
 if not (yt_dlp is None):
+    print("here")
     # import YouTubeDL Parser
     from yt_dlp import YoutubeDL
 

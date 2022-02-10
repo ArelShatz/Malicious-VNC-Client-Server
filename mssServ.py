@@ -127,6 +127,7 @@ def halt(seconds):
 
 minFrameDelta = 0.016666
 estimate = 0.01
+resolution = (1280, 960)
 
 
 options = {"jpeg_compression": True,
@@ -151,26 +152,22 @@ stream = ScreenGear(backend="mss",
                     colorspace="COLOR_BGR2RGB",
                     logging=False).start()
 
-while True:    
-    #frameStart = time.perf_counter()
-        
+framesTotalTime = 0
+counter = 0
+while True:
+    frameStart = time.perf_counter()
     frame = stream.read()
-    #print(frame)
     frame = numpy.flip(frame[:, :, :3], 2)
-    #originalShape = originalFrame.shape
-    #originalDType = originalFrame.dtype
-        
-    #frame = zlib.compress(originalFrame.tobytes())
-    #frame = numpy.frombuffer(frame, dtype=originalDType)
-    frame = reducer(frame, percentage = 30)
+    frame = cv2.resize(frame, resolution, interpolation=cv2.INTER_LANCZOS4)
     server.send(frame)
+    counter += 1
+    framesTotalTime += time.perf_counter() - frameStart
 
-    #frameEnd = time.perf_counter()
-    #frameTimeElapsed = frameEnd - frameStart
     #halt(minFrameDelta - frameTimeElapsed)
     #cv2.imshow("frame", frame)
     #frameWaitPeriodEnd = time.perf_counter()
-    #print(1 / (frameEnd - frameStart))
+    
+print(1 / (framesTotalTime / counter))
 
 
 cv2.destroyAllWindows()

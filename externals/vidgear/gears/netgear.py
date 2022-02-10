@@ -25,6 +25,7 @@ import zlib
 import string
 import secrets
 import numpy as np
+from rectTest import GetChangedAreas
 import logging as log
 from threading import Thread
 from collections import deque
@@ -231,6 +232,8 @@ class NetGear:
 
         # define termination flag
         self.__terminate = False
+
+        self.__prevFrame = None
 
         # additional settings for reliability
         if pattern < 2:
@@ -1036,7 +1039,7 @@ class NetGear:
                     )
                 continue
 
-            msg_data = self.__msg_socket.recv(
+            frame = self.__msg_socket.recv(
                 flags=self.__msg_flag | zmq.DONTWAIT,
                 copy=self.__msg_copy,
                 track=self.__msg_track,
@@ -1139,11 +1142,14 @@ class NetGear:
                 if self.__return_data:
                     logger.warning("`return_data` is disabled for this pattern!")
 
+            if msg_json["rle"]:
+                frame = zlib.decompress(frame)
+                
             # check if encoding was enabled
             if msg_json["compression"]:
                 # decode JPEG frame
                 frame = simplejpeg.decode_jpeg(
-                    msg_data,
+                    frame,
                     colorspace=msg_json["compression"]["colorspace"],
                     fastdct=self.__jpeg_compression_fastdct
                     or msg_json["compression"]["dct"],
@@ -1165,8 +1171,6 @@ class NetGear:
                 frame_buffer = np.frombuffer(msg_data, dtype=msg_json["dtype"])
                 frame = frame_buffer.reshape(msg_json["shape"])
 
-            if msg_json["rle"]:
-                frame = zlib.decompress(frame)
             # check if multiserver_mode
             if self.__multiserver_mode:
                 # save the unique port addresses
@@ -1262,6 +1266,30 @@ class NetGear:
             frame = np.ascontiguousarray(frame, dtype=frame.dtype)
 
         # handle JPEG compression encoding
+
+        """if self.__prevFrame is None:
+            self.__prevFrame = np.zeros_like(frame)
+            
+        else:
+            currentFrameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            prevFrameGray = cv2.cvtColor(self.__prevFrame, cv2.COLOR_BGR2GRAY)
+            result = cv2.bitwise_xor(currentFrameGray, prevFrameGray)
+            mask = cv2.inRange(result, 1, 255)
+            contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            rects = []
+            for contour in contours:
+                x, y, w, h = cv2.boundingRect(contour)
+                rects.append((x, y, w, h))
+                rectImg = currentFrame[y:y+h, x:x+w]
+
+            for rect in rects:
+                x = rect[0]
+                y = rect[1]
+                w = rect[2]
+                h = rect[3]
+                rectImg = currentFrame[y:y+h, x:x+w]"""
+
+            
         if self.__jpeg_compression:
             if self.__jpeg_compression_colorspace == "GRAY":
                 if frame.ndim == 2:
