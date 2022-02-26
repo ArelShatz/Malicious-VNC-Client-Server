@@ -25,7 +25,6 @@ import zlib
 import string
 import secrets
 import numpy as np
-from rectTest import GetChangedAreas
 import logging as log
 from threading import Thread
 from collections import deque
@@ -1271,23 +1270,14 @@ class NetGear:
             self.__prevFrame = np.zeros_like(frame)
             
         else:
-            currentFrameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            prevFrameGray = cv2.cvtColor(self.__prevFrame, cv2.COLOR_BGR2GRAY)
-            result = cv2.bitwise_xor(currentFrameGray, prevFrameGray)
-            mask = cv2.inRange(result, 1, 255)
-            contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+            xored = cv2.bitwise_xor(frame, self.__prevFrame)
+            mask = cv2.inRange(xored, 1, 255)
+            contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
             rects = []
             for contour in contours:
                 x, y, w, h = cv2.boundingRect(contour)
                 rects.append((x, y, w, h))
-                rectImg = currentFrame[y:y+h, x:x+w]
-
-            for rect in rects:
-                x = rect[0]
-                y = rect[1]
-                w = rect[2]
-                h = rect[3]
-                rectImg = currentFrame[y:y+h, x:x+w]"""
+                rectImg = frame[y:y+h, x:x+w]"""
 
             
         if self.__jpeg_compression:

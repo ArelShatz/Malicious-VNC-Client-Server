@@ -47,5 +47,3 @@ def GetChangedAreas(currentFrame, prevFrame):
     #cv2.imshow('r', blackAndWhiteImage)
     #cv2.imshow('result', blackAndWhiteImage)
     #cv2.waitKey(0)
-
-a = GetChangedAreas

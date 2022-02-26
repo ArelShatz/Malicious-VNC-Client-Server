@@ -97,6 +97,7 @@ with mss() as sct:
 from externals.vidgear.gears import ScreenGear
 from externals.vidgear.gears import NetGear
 from externals.vidgear.gears.helper import reducer
+from utils import *
 from PIL import Image
 import profile
 import pstats
@@ -104,29 +105,7 @@ import cv2
 import time
 import numpy
 
-def SpinLock(seconds):
-    end = 0
-    start = time.perf_counter()
-    while end - start < seconds:
-        end = time.perf_counter()
-        
-    return
 
-    #print("fps: " + str(round(1/(end - start))))
-
-
-def halt(seconds):
-    while seconds > estimate:
-        start = time.perf_counter()
-        time.sleep(0.001)
-        end = time.perf_counter()
-        seconds -= (end - start)
-
-    SpinLock(seconds)
-
-
-minFrameDelta = 0.016666
-estimate = 0.01
 resolution = (1280, 960)
 
 
@@ -152,6 +131,8 @@ stream = ScreenGear(backend="mss",
                     colorspace="COLOR_BGR2RGB",
                     logging=False).start()
 
+cv2.imshow("frame", numpy.zeros((1, 1)))
+
 framesTotalTime = 0
 counter = 0
 while True:
@@ -160,12 +141,16 @@ while True:
     frame = numpy.flip(frame[:, :, :3], 2)
     frame = cv2.resize(frame, resolution, interpolation=cv2.INTER_LANCZOS4)
     server.send(frame)
-    counter += 1
-    framesTotalTime += time.perf_counter() - frameStart
 
-    #halt(minFrameDelta - frameTimeElapsed)
+    frameEnd = time.perf_counter()
+    framesTotalTime += frameEnd - frameStart
+    counter += 1
+    halt(minFrameDelta - (frameEnd - frameStart))
     #cv2.imshow("frame", frame)
     #frameWaitPeriodEnd = time.perf_counter()
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
+        break
     
 print(1 / (framesTotalTime / counter))
 
