@@ -1,34 +1,17 @@
-from vidgear.gears import ScreenGear
-from vidgear.gears import NetGear
+from externals.vidgear.gears import ScreenGear
+from externals.vidgear.gears import NetGear
+import asyncio
 import cv2
+import profile
+import pstats
 import time
-import zlib
+import numpy
+from utils import *
 
 
-def SpinLock(seconds):
-    end = 0
-    start = time.perf_counter()
-    while end - start < seconds:
-        end = time.perf_counter()
-        
-    return
-
-    #print("fps: " + str(round(1/(end - start))))
-
-
-def halt(seconds):
-    while seconds > estimate:
-        start = time.perf_counter()
-        time.sleep(0.001)
-        end = time.perf_counter()
-        seconds -= (end - start)
-
-    SpinLock(seconds)
-
-
-minFrameDelta = 0.016666
-estimate = 0.01
-
+options = {
+    "bidirectional_mode": True,
+    }
 
 client = NetGear(
     receive_mode=True,
@@ -36,27 +19,33 @@ client = NetGear(
     port="5900",
     protocol="tcp",
     pattern=1,
-    logging=False
+    logging=False,
+    **options
 )
 
+counter = 0
+frames = 0
 while True:
 
-    #frameStart = time.perf_counter()
-    
+    frameStart = time.perf_counter()    
     frame = client.recv()
-    #frame = zlib.decompress(frame)
+    #frame = numpy.frombuffer(frame, dtype=numpy.uint8)
+    #frame = frame.reshape(1200, 1600, 3)
+    #print(frame.size)
     cv2.imshow("Output Frame", frame)
-    
-    #frameEnd = time.perf_counter()
-    #frameTimeElapsed = frameStart - frameEnd
-    #halt(minFrameDelta - frameTimeElapsed)
-    #frameWaitPeriodEnd = time.perf_counter()
+        
+    counter += 1
+    frameEnd = time.perf_counter()
+    #halt(minFrameDelta - (frameEnd - frameStart))
+    frames += perf_counter() - frameStart
     #print(1/ (frameWaitPeriodEnd - frameStart))
-    
+        
 
     key = cv2.waitKey(1) & 0xFF
     if key == ord("q"):
         break
+
+print(1 / (frames / counter))
 
 cv2.destroyAllWindows()
 client.close()

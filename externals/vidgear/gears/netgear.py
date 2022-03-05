@@ -20,12 +20,15 @@ limitations under the License.
 # import the necessary packages
 import os
 import cv2
+import sys
 import time
 import zlib
 import string
 import secrets
 import numpy as np
 import logging as log
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0]))))
+from utils import *
 from threading import Thread
 from collections import deque
 from os.path import expanduser
@@ -954,6 +957,7 @@ class NetGear:
 
         # keep looping infinitely until the thread is terminated
         while not self.__terminate:
+            frameStart = perf_counter()
 
             # check queue buffer for overflow
             if len(self.__queue) >= 96:
@@ -1191,6 +1195,9 @@ class NetGear:
             else:
                 # otherwise append recovered frame to queue
                 self.__queue.append(frame)
+
+
+        #halt(minFrameDelta - (perf_counter() - frameStart))
 
     def recv(self, return_data=None):
         """
