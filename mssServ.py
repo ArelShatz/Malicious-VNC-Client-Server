@@ -97,6 +97,7 @@ with mss() as sct:
 from externals.vidgear.gears import ScreenGear
 from externals.vidgear.gears import NetGear
 from externals.vidgear.gears.helper import reducer
+from inputListener import Listener
 from utils import *
 from PIL import Image
 import profile
@@ -114,14 +115,15 @@ options = {"jpeg_compression": True,
            "jpeg_compression_fastupsample": True,
            "jpeg_compression_quality": 50,
            "rle_compression": True,
-           "rle_compression_strength": 6
+           "rle_compression_strength": 6,
+           "bidirectional_mode": True
 }
 
 server = NetGear(
     address="192.168.1.132",
     port="5900",
     protocol="tcp",
-    pattern=2,
+    pattern=1,
     logging=False,
     **options
 )
@@ -131,30 +133,41 @@ stream = ScreenGear(backend="mss",
                     colorspace="COLOR_BGR2RGB",
                     logging=False).start()
 
-cv2.imshow("frame", numpy.zeros((1, 1)))
+listener = Listener()
+listener.start()
+
+#cv2.imshow("frame", numpy.zeros((1, 1)))
 
 framesTotalTime = 0
 counter = 0
 while True:
     frameStart = time.perf_counter()
+    while True:
+        instructionQueue = listener.fetch()
+        try:
+            print(instructionQueue.get_nowait())
+        except:
+            continue
     frame = stream.read()
     frame = numpy.flip(frame[:, :, :3], 2)
     frame = cv2.resize(frame, resolution, interpolation=cv2.INTER_LANCZOS4)
     server.send(frame)
 
-    frameEnd = time.perf_counter()
-    framesTotalTime += frameEnd - frameStart
     counter += 1
-    halt(minFrameDelta - (frameEnd - frameStart))
+    frameEnd = time.perf_counter()
+
+    #halt(minFrameDelta - (frameEnd - frameStart))
+    #framesTotalTime += time.perf_counter() - frameStart
     #cv2.imshow("frame", frame)
     #frameWaitPeriodEnd = time.perf_counter()
-    key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
-        break
+    #key = cv2.waitKey(1) & 0xFF
+    #if key == ord("q"):
+    #    break
     
 print(1 / (framesTotalTime / counter))
 
 
 cv2.destroyAllWindows()
+listener.stop()
 stream.stop()
 server.close()

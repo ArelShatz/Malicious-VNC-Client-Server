@@ -1,7 +1,8 @@
 from time import perf_counter, sleep
 
 
-minFrameDelta = 0.03333
+minFrameDelta = 0.041666
+minFrameDelta = 0.05
 estimate = 0.01
 
 def SpinLock(seconds):

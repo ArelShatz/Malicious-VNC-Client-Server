@@ -18,7 +18,11 @@ limitations under the License.
 ===============================================
 """
 # import the necessary packages
+import os
 import cv2
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0]))))
+from utils import *
 import time
 import queue
 import numpy as np
@@ -71,6 +75,7 @@ class ScreenGear:
 
         # enable logging if specified:
         self.__logging = logging if isinstance(logging, bool) else False
+
 
         # create monitor instance for the user-defined monitor
         self.__monitor_instance = None
@@ -217,6 +222,8 @@ class ScreenGear:
         # keep looping infinitely until the thread is terminated
         while True:
 
+            frameStart = perf_counter()
+
             # if the thread indicator variable is set, stop the thread
             if self.__terminate.is_set():
                 break
@@ -274,6 +281,9 @@ class ScreenGear:
                 self.frame = frame
             # append to queue
             self.__queue.put(self.frame)
+
+
+            halt(minFrameDelta - (perf_counter() - frameStart))
 
         # finally release mss resources
         if self.__monitor_instance:
