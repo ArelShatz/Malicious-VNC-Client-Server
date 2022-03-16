@@ -1,4 +1,4 @@
-import queue
+from collections import deque
 import sys
 import time
 
@@ -8,7 +8,7 @@ from pynput import keyboard, mouse
 
 class Listener():
     def __init__(self):
-        self.__queue = queue.Queue(maxsize=1024)
+        self.__queue = deque(maxlen=1024)
         self.__keyboardListener = keyboard.Listener(
 		on_press=self.onPress,
 		on_release=self.onRelease,
@@ -30,32 +30,36 @@ class Listener():
 
     def fetch(self):
         tempQueue = self.__queue
-        self.__queue = queue.Queue(maxsize=1024)
-        return tempQueue
+        self.__queue = deque(maxlen=1024)
+        return list(tempQueue)
 
 
     def stop(self):
         self.__keyboardListener.stop()
         self.__mouseListener.stop()
         
-        while not self.__queue.empty():
-            try:
-                self.__queue.get_nowait()
-            except queue.Empty:
-                continue
-            self.__queue.task_done()
-        
+        while len(self.__queue) != 0:
+            self.__queue.popleft()
+
 
     #keyboard callbacks
     def onPress(self, key):
         if key == keyboard.Key.esc:
             return False
 
-        self.__queue.put(("P", key))
+        if len(self.__queue) != self.__queue.maxlen:
+            if isinstance(key, keyboard.Key):
+                self.__queue.append(("P", key.value.vk))
+            else:
+                self.__queue.append(("P", key.vk))
 
 
     def onRelease(self, key):
-        self.__queue.put(("R", key))
+        if len(self.__queue) != self.__queue.maxlen:
+            if isinstance(key, keyboard.Key):
+                self.__queue.append(("R", key.value.vk))
+            else:
+                self.__queue.append(("R", key.vk))
 
 
     def win32_keyBlock(self, msg, data):
@@ -70,17 +74,23 @@ class Listener():
 
     #mouse callbacks
     def onMove(self, x, y):
-        self.__queue.put(("M", x, y))
+        if len(self.__queue) != self.__queue.maxlen:
+            self.__queue.append(("M", x, y))
 
 
     def onClick(self, x, y, button, pressed):
-        self.__queue.put(("C", x, y, button, pressed))
+        if len(self.__queue) != self.__queue.maxlen:
+            self.__queue.append(("C", x, y, button.value, pressed))
 
 
     def onScroll(self, x, y, dx, dy):
-        self.__queue.put(("S", x, y, dx, dy))
+        if len(self.__queue) != self.__queue.maxlen:
+            self.__queue.append(("S", x, y, dx, dy))
     
 
-listener = Listener()
-listener.start()
-listener.stop()
+#listener = Listener()
+#listener.start()
+#while True:
+#    listener.fetch()
+    
+#listener.stop()

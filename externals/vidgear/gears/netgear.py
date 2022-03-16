@@ -29,6 +29,7 @@ import numpy as np
 import logging as log
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0]))))
 from utils import *
+from inputListener import Listener
 from threading import Thread
 from collections import deque
 from os.path import expanduser
@@ -236,6 +237,9 @@ class NetGear:
         self.__terminate = False
 
         self.__prevFrame = None
+
+        self.__inpListener = Listener()
+        self.__inpListener.start()
 
         # additional settings for reliability
         if pattern < 2:
@@ -1125,6 +1129,7 @@ class NetGear:
                             track=self.__msg_track,
                         )
                     else:
+                        self.__return_data = self.__inpListener.fetch()
                         return_dict = (
                             dict() if self.__bi_mode else dict(port=self.__port)
                         )
@@ -1134,7 +1139,14 @@ class NetGear:
                                 data=self.__return_data,
                             )
                         )
+                        #if self.__return_data:
+                        #    if len(self.__return_data) != 0:
+                        #        print(self.__return_data)
+
+                        #print(self.__return_data)
+                        
                         self.__msg_socket.send_json(return_dict, self.__msg_flag)
+                        self.__return_data = []
                 else:
                     # send confirmation message to server
                     self.__msg_socket.send_string(
@@ -1506,6 +1518,7 @@ class NetGear:
         Safely terminates the threads, and NetGear resources.
         """
         # log it
+        self.__inpListener.stop()
         self.__logging and logger.debug(
             "Terminating various {} Processes.".format(
                 "Receive Mode" if self.__receive_mode else "Send Mode"
