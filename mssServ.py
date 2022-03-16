@@ -96,8 +96,8 @@ with mss() as sct:
 
 from externals.vidgear.gears import ScreenGear
 from externals.vidgear.gears import NetGear
-from externals.vidgear.gears.helper import reducer
-from inputListener import Listener
+from collections import deque
+from executor import Executor
 from utils import *
 from PIL import Image
 import profile
@@ -107,67 +107,66 @@ import time
 import numpy
 
 
-resolution = (1280, 960)
+
+class Server():
+    def __init__(self):
+        
+        self.resolution = (1280, 960)
+
+        self.executor = Executor()
+
+        options = {"jpeg_compression": True,
+                   "jpeg_compression_fastdct": True,
+                   "jpeg_compression_fastupsample": True,
+                   "jpeg_compression_quality": 50,
+                   "rle_compression": True,
+                   "rle_compression_strength": 6,
+                   "bidirectional_mode": True
+        }
+
+        self.server = NetGear(
+            address="192.168.1.132",
+            port="5900",
+            protocol="tcp",
+            pattern=1,
+            logging=False,
+            **options
+        )
+
+        self.stream = ScreenGear(backend="mss",
+                            monitor=1,
+                            colorspace="COLOR_BGR2RGB",
+                            logging=False).start()
+
+        self.__running = True
 
 
-options = {"jpeg_compression": True,
-           "jpeg_compression_fastdct": True,
-           "jpeg_compression_fastupsample": True,
-           "jpeg_compression_quality": 50,
-           "rle_compression": True,
-           "rle_compression_strength": 6,
-           "bidirectional_mode": True
-}
+    def start(self):
+        framesTotalTime = 0
+        counter = 0
+        while self.__running:
+            frameStart = time.perf_counter()
+            frame = self.stream.read()
+            frame = numpy.flip(frame[:, :, :3], 2)
+            frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4)
+            return_data = self.server.send(frame, "a")
+            if return_data:
+                self.executor.execute(deque(return_data))
 
-server = NetGear(
-    address="192.168.1.132",
-    port="5900",
-    protocol="tcp",
-    pattern=1,
-    logging=False,
-    **options
-)
+            counter += 1
+            frameEnd = time.perf_counter()
 
-stream = ScreenGear(backend="mss",
-                    monitor=1,
-                    colorspace="COLOR_BGR2RGB",
-                    logging=False).start()
-
-listener = Listener()
-listener.start()
-
-#cv2.imshow("frame", numpy.zeros((1, 1)))
-
-framesTotalTime = 0
-counter = 0
-while True:
-    frameStart = time.perf_counter()
-    while True:
-        instructionQueue = listener.fetch()
-        try:
-            print(instructionQueue.get_nowait())
-        except:
-            continue
-    frame = stream.read()
-    frame = numpy.flip(frame[:, :, :3], 2)
-    frame = cv2.resize(frame, resolution, interpolation=cv2.INTER_LANCZOS4)
-    server.send(frame)
-
-    counter += 1
-    frameEnd = time.perf_counter()
-
-    #halt(minFrameDelta - (frameEnd - frameStart))
-    #framesTotalTime += time.perf_counter() - frameStart
-    #cv2.imshow("frame", frame)
-    #frameWaitPeriodEnd = time.perf_counter()
-    #key = cv2.waitKey(1) & 0xFF
-    #if key == ord("q"):
-    #    break
-    
-print(1 / (framesTotalTime / counter))
+            #halt(minFrameDelta - (frameEnd - frameStart))
+            #framesTotalTime += time.perf_counter() - frameStart
+            #cv2.imshow("frame", frame)
+            #frameWaitPeriodEnd = time.perf_counter()
+            #key = cv2.waitKey(1) & 0xFF
+            #if key == ord("q"):
+            #    break
 
 
-cv2.destroyAllWindows()
-listener.stop()
-stream.stop()
-server.close()
+    def stop(self):
+        self.__running = False
+        self.executor.stop()
+        self.stream.stop()
+        self.server.close()

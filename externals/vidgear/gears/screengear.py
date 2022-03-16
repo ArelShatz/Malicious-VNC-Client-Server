@@ -29,6 +29,8 @@ import numpy as np
 import logging as log
 from threading import Thread, Event
 from collections import deque, OrderedDict
+import mss.windows
+mss.windows.CAPTUREBLT = 0
 
 # import helper packages
 from .helper import import_dependency_safe, capPropId, logger_handler

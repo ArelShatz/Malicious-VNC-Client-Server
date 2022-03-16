@@ -2,17 +2,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-
 class DisplayBuffer(QLabel):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.setHidden(False)
-		self.pixmap = QPixmap("Gears.png")
 
 
 	def updateBuffer(self, frame):
-		painter = QPainter(self.pixmap)
-		painter.drawPixmap(QRect(0, 0, 100, 100), self.grab())
-		painter.end()
-		self.pixmap.fill(Qt.black)
-		self.setPixmap(self.pixmap)
+		height, width, channel = frame.shape
+		bytesPerLine = 3 * width
+		qImg = QImage(frame.data, width, height, bytesPerLine, QImage.Format_RGB888)
+		self.setPixmap(QPixmap.fromImage(qImg))
