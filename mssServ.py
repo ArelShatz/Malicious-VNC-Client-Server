@@ -109,8 +109,7 @@ import numpy
 
 
 class Server():
-    def __init__(self):
-        
+    def __init__(self, ip):
         self.resolution = (1280, 960)
 
         self.executor = Executor()
@@ -125,7 +124,7 @@ class Server():
         }
 
         self.server = NetGear(
-            address="192.168.1.132",
+            address=ip,
             port="5900",
             protocol="tcp",
             pattern=1,

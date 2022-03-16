@@ -52,10 +52,9 @@ class ConnWin(QWidget):
                 self.resText.setText("Already Connected To This IP")
 
             else:
-                self.mainWin.connection = ip
                 self.resText.setStyleSheet("color: white;")
                 self.resText.setText("Connecting...")
-                self.mainWin.connect()
+                self.mainWin.connect(ip)
                 self.close()
 
         else:

@@ -14,6 +14,7 @@ from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
 from mssServ import Server
+from mssClient import Client
 
 import cv2
 
@@ -105,12 +106,10 @@ class Window(QMainWindow, Ui_MainWindow):
             return settings
 
 
-    def connect(self):
-        pass
-
-
-    def disconnect(self):
-        pass
+    def connect(self, ip):
+        self.connection = ip
+        self.server = Server(self.connection)
+        self.server.start()
 
 
     def closeEvent(self, event):
@@ -157,20 +156,23 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Disconnect_triggered(self):
-        pass
+        if self.connection:
+            self.connection = ""
+            self.server.close()
 
 
     @pyqtSlot()
     def on_action_Bind_triggered(self):
         self.bind = True
-        self.server = Server()
-        self.server.start()
+        self.client = Client()
+        self.client.start()
 
 
     @pyqtSlot()
     def on_action_Close_triggered(self):
-        self.bind = False
-        self.server.close()
+        if self.bind:
+            self.bind = False
+            self.client.close()
 
 
 if __name__ == '__main__':
