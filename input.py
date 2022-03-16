@@ -2,24 +2,34 @@ import sys
 import time
 
 sys.path.append(sys.path[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
-from pynput import keyboard
+from pynput import keyboard, mouse
 
-"""def keyPressed(key):
-	if key == keyboard.Key.esc:
-		return False
 
+"""def on_click(x, y, button, pressed):
+        help(button)
+
+listener = mouse.Listener(
+        on_click=on_click,
+        suppress=False)
+
+listener.start()
+listener.join()"""
+
+def keyPressed(key):
+        if key == keyboard.Key.esc:
+                return False
+        
 def keyReleased(key):
 	pass
 
 def win32_block(msg, data):
-	if data.vkCode != 0x1B:
-		print(msg)
-		listener._suppress = True
+        if data.vkCode != 0x1B:
+                listener._suppress = True
 
-	else:
-		listener._suppress = False
+        else:
+                listener._suppress = False
 
-	return True
+        return True
 
 
 if __name__ == "__main__":
@@ -30,11 +40,13 @@ if __name__ == "__main__":
 
 	listener.start()
 	listener.join()
-	#while True: time.sleep(0.01)"""
+	#while True: time.sleep(0.01)
 
-import asyncio
 
-"""async def keyboardEvents():
+
+"""import asyncio
+
+async def keyboardEvents():
 	with keyboard.Events() as events:
 		event = await events.get()
 		if event is not None:
@@ -52,7 +64,7 @@ async def main():
 
 
 if __name__ == "__main__":
-	asyncio.run(main())"""
+	asyncio.run(main())
 
 
 
@@ -70,4 +82,5 @@ async def main():
 
 
 if __name__ == "__main__":
-	asyncio.run(main())
+	asyncio.run(main())"""
+

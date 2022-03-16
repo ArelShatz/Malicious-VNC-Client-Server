@@ -9,9 +9,13 @@ from UI.main_window_ui import Ui_MainWindow
 from json import load, dump, decoder
 
 from UI.SaveWindow import SaveWin
+from UI.ConnectionWindow import ConnWin
 from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
+from mssServ import Server
+
+import cv2
 
 palettes = {
         "White (default)": WhitePalette,
@@ -30,12 +34,17 @@ defaultSettings = {
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, App, parent=None):
         super().__init__(parent)
-        self.setupUi(self)  #read & load the compied .ui file
+        self.setupUi(self)  #read & load the compiled .ui file
 
         self.addAction(self.action_Save_To)
         self.addAction(self.action_UI)
         self.addAction(self.action_Exit)
         self.addAction(self.action_Fullscreen)
+        self.addAction(self.action_Connect)
+        self.addAction(self.action_Disconnect)
+        self.addAction(self.action_Bind)
+        self.addAction(self.action_Close)
+
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
         self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #change 3rd bit (fullscreen flag) to 0 (XXXX & 1011(11) = X0XX)
@@ -48,17 +57,15 @@ class Window(QMainWindow, Ui_MainWindow):
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
 
-        self.label.setHidden(False)
-        self.label.updateBuffer(QImage("Gears.png"))
+        self.label.updateBuffer(cv2.imread("Gears.png"))
+
+        self.bind = False
+        self.connection = ""
 
 
     def ToggleFullscreen(self, newState):
         self.setWindowState(newState);
         self.menubar.setHidden(newState)
-
-
-    def OpenConnWin(self):
-        self.OpenWin(ConnectionWindow, "Connection Manager")
 
 
     def OpenWin(self, Win, name):
@@ -98,6 +105,14 @@ class Window(QMainWindow, Ui_MainWindow):
             return settings
 
 
+    def connect(self):
+        pass
+
+
+    def disconnect(self):
+        pass
+
+
     def closeEvent(self, event):
         self.msgBox = QMessageBox()
         self.msgBox.setAttribute(Qt.WA_DeleteOnClose)
@@ -133,6 +148,29 @@ class Window(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_action_Fullscreen_triggered(self):
         self.ToggleFullscreen(self.windowState() ^ Qt.WindowFullScreen)
+
+
+    @pyqtSlot()
+    def on_action_Connect_triggered(self):
+        self.OpenWin(ConnWin, "Connection Manager")
+
+
+    @pyqtSlot()
+    def on_action_Disconnect_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Bind_triggered(self):
+        self.bind = True
+        self.server = Server()
+        self.server.start()
+
+
+    @pyqtSlot()
+    def on_action_Close_triggered(self):
+        self.bind = False
+        self.server.close()
 
 
 if __name__ == '__main__':

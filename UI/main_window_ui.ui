@@ -80,10 +80,13 @@
    </widget>
    <widget class="QMenu" name="menuConnect">
     <property name="title">
-     <string>Connect</string>
+     <string>Connection</string>
     </property>
-    <addaction name="action_Connect_2"/>
     <addaction name="action_Connect"/>
+    <addaction name="action_Disconnect"/>
+    <addaction name="separator"/>
+    <addaction name="action_Bind"/>
+    <addaction name="action_Close"/>
    </widget>
    <widget class="QMenu" name="menuRecord">
     <property name="title">
@@ -115,12 +118,12 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_Connect_2">
+  <action name="action_Connect">
    <property name="text">
     <string>&amp;Connect</string>
    </property>
   </action>
-  <action name="action_Connect">
+  <action name="action_Disconnect">
    <property name="text">
     <string>&amp;Disconnect</string>
    </property>
@@ -158,6 +161,16 @@
    </property>
    <property name="shortcut">
     <string>F11</string>
+   </property>
+  </action>
+  <action name="action_Bind">
+   <property name="text">
+    <string>&amp;Bind</string>
+   </property>
+  </action>
+  <action name="action_Close">
+   <property name="text">
+    <string>&amp;Close</string>
    </property>
   </action>
  </widget>
