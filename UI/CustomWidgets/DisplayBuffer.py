@@ -11,8 +11,8 @@ class DisplayBuffer(QLabel):
         def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.setHidden(False)
-                blank = zeros((self.width(), self.height()), dtype=uint8)
-                self.updateBuffer(cvtColor(blank, 8))
+                self.blank = zeros((self.width(), self.height()), dtype=uint8)
+                self.updateBuffer(cvtColor(self.blank, 8))
 
 
         def updateBuffer(self, frame):
