@@ -22,7 +22,8 @@ class Executor():
         self.executor = Thread(target=self.__execute, args=(queue,))
         self.executor.daemon = True
         self.executor.start()
-        
+
+
     def __execute(self, queue):
         while self.__running:
             if len(queue) != 0:

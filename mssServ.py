@@ -100,8 +100,6 @@ from collections import deque
 from executor import Executor
 from utils import *
 from PIL import Image
-import profile
-import pstats
 import cv2
 import time
 import numpy
@@ -110,6 +108,7 @@ import numpy
 
 class Server():
     def __init__(self, ip):
+        print(ip)
         self.resolution = (1280, 960)
 
         self.executor = Executor()
@@ -124,7 +123,7 @@ class Server():
         }
 
         self.server = NetGear(
-            address=ip,
+            address="192.168.1.132",
             port="5900",
             protocol="tcp",
             pattern=1,
@@ -134,7 +133,7 @@ class Server():
 
         self.stream = ScreenGear(backend="mss",
                             monitor=1,
-                            colorspace="COLOR_BGR2RGB",
+                            #colorspace="COLOR_BGR2RGB",
                             logging=False).start()
 
         self.__running = True
