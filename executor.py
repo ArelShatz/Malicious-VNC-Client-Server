@@ -57,3 +57,13 @@ class Executor():
     def close(self):
         self.__running = False
         self.executor.join()
+
+        #release every button in case it was held while exiting
+        self.__mouseCtrl.release(Button.left)
+        self.__mouseCtrl.release(Button.right)
+        self.__mouseCtrl.release(Button.middle)
+        self.__mouseCtrl.release(Button.unknown)
+        self.__mouseCtrl.release(Button.x1)
+        self.__mouseCtrl.release(Button.x2)
+        for i in range(255):
+            self.__keyboardCtrl.release(KeyCode.from_vk(i))

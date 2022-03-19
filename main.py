@@ -121,6 +121,8 @@ class Window(QMainWindow, Ui_MainWindow):
         reply = self.msgBox.exec_()
 
         if reply == QMessageBox.Yes:
+            self.on_action_Disconnect_triggered()
+            self.on_action_Close_triggered()
             event.accept()
 
         else:
