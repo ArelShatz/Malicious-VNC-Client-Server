@@ -6,16 +6,20 @@ import cv2
 import time
 import numpy
 from utils import *
+from threading import Thread
+from PyQt5.QtCore import pyqtSignal
 
 
 
 class Client():
-    def __init__(self):
+    def __init__(self, win):
+        self.win = win
+        
         options = {
             "bidirectional_mode": True,
             }
 
-        client = NetGear(
+        self.client = NetGear(
             receive_mode=True,
             address="192.168.1.132",
             port="5900",
@@ -29,6 +33,12 @@ class Client():
 
 
     def start(self):
+        self.__thread = Thread(target=self.__start)
+        self.__thread.daemon = True
+        self.__thread.start()
+
+
+    def __start(self):
         #listener = Listener()
         #listener.start()
 
@@ -38,12 +48,14 @@ class Client():
             frameStart = time.perf_counter()
             #instructionQueue = listener.fetch()
 
-            data, frame = client.recv(return_data=None)
+            data, frame = self.client.recv(return_data=None)
             #frame = numpy.frombuffer(frame, dtype=numpy.uint8)
 
             #frame = frame.reshape(1200, 1600, 3)
             #print(frame.size)
-            cv2.imshow("Output Frame", frame)
+            #cv2.imshow("Output Frame", frame)
+            #cv2.waitKey(1)
+            self.win.label.updated.emit(frame)
             counter += 1
 
             frameEnd = time.perf_counter()
@@ -51,7 +63,9 @@ class Client():
             frames += perf_counter() - frameStart
             #print(1/ (frameWaitPeriodEnd - frameStart))
 
+
     def close(self):
         #listener.stop()
         self.__running = False
-        client.close()
+        self.client.close()
+
