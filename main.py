@@ -59,6 +59,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ChangeTheme(tempTheme)
 
         self.label.updateBuffer(cv2.imread("Gears.png"))
+        self.label.updated.connect(self.label.updateBuffer)
 
         self.bind = False
         self.connection = ""
@@ -164,7 +165,7 @@ class Window(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_action_Bind_triggered(self):
         self.bind = True
-        self.client = Client()
+        self.client = Client(self)
         self.client.start()
 
 
