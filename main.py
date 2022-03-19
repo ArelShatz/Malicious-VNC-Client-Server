@@ -173,7 +173,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.bind:
             self.bind = False
             self.client.close()
-            self.label.updateLabel(self.label.blank)
+            self.label.updateBuffer(self.label.blank)
 
 
 if __name__ == '__main__':
