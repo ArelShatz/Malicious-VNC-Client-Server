@@ -1,7 +1,5 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QWidget, QFileDialog
+from PyQt5.QtCore import pyqtSlot, Qt
 from UI.CustomWidgets.LineEdits import LockedLineEdit
 from os.path import exists, splitext, dirname, join, basename
 

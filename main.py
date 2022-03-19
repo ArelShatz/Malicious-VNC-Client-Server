@@ -1,6 +1,5 @@
-from sys import argv, exit as sysExit
-import sys
-sys.path.append(sys.path[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
+from sys import argv, exit as sysExit, path as sysPath
+sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton
 from PyQt5.QtCore import Qt, pyqtSlot, QState
@@ -16,7 +15,6 @@ from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 from mssServ import Server
 from mssClient import Client
 
-import cv2
 
 palettes = {
         "White (default)": WhitePalette,
@@ -58,7 +56,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
 
-        self.label.updateBuffer(cv2.imread("Gears.png"))
         self.label.updated.connect(self.label.updateBuffer)
 
         self.bind = False

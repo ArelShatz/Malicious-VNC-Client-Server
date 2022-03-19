@@ -1,7 +1,6 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QWidget
+from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtGui import QFont, QIcon
 from UI.CustomWidgets.LineEdits import IPLineEdit
 
 

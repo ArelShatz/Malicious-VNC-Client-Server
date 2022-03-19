@@ -1,1 +1,1 @@
-D:/pyinstaller-develop
+D:/pyinstaller-develop/pyinstaller-develop

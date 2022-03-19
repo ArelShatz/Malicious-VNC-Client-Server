@@ -1,10 +1,10 @@
 from collections import deque
-import sys
-import time
+from sys import path as sysPath
+from time import sleep
 
-sys.path.append(sys.path[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
+sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 from pynput.keyboard import KeyCode, Controller as keyboardController
-from pynput.mouse import  Button, Controller as mouseController
+from pynput.mouse import Button, Controller as mouseController
 from threading import Thread
 
 
@@ -51,7 +51,7 @@ class Executor():
                     self.__mouseCtrl.scroll(item[3], item[4])
 
             else:
-                time.sleep(0.0001)
+                sleep(0.0001)
 
 
     def close(self):

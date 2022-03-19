@@ -1,22 +1,22 @@
 from collections import deque
-import sys
-import time
+from sys import path as sysPath
 
-sys.path.append(sys.path[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
-from pynput import keyboard, mouse
+sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
+from pynput.keyboard import Key, Listener as keyboardListener
+from pynput.mouse import Button, Listener as mouseListener
 
 
 class Listener():
     def __init__(self):
         self.__queue = deque(maxlen=1024)
-        self.__keyboardListener = keyboard.Listener(
+        self.__keyboardListener = keyboardListener(
 		on_press=self.onPress,
 		on_release=self.onRelease,
 		win32_event_filter=self.win32_keyBlock,
                 suppress=False)
 
 
-        self.__mouseListener = mouse.Listener(
+        self.__mouseListener = mouseListener(
                 on_move=self.onMove,
                 on_click=self.onClick,
                 on_scroll=self.onScroll,
@@ -44,11 +44,11 @@ class Listener():
 
     #keyboard callbacks
     def onPress(self, key):
-        if key == keyboard.Key.esc:
+        if key == Key.esc:
             return False
 
         if len(self.__queue) != self.__queue.maxlen:
-            if isinstance(key, keyboard.Key):
+            if isinstance(key, Key):
                 self.__queue.append(("P", key.value.vk))
             else:
                 self.__queue.append(("P", key.vk))
@@ -56,7 +56,7 @@ class Listener():
 
     def onRelease(self, key):
         if len(self.__queue) != self.__queue.maxlen:
-            if isinstance(key, keyboard.Key):
+            if isinstance(key, Key):
                 self.__queue.append(("R", key.value.vk))
             else:
                 self.__queue.append(("R", key.vk))
@@ -86,11 +86,3 @@ class Listener():
     def onScroll(self, x, y, dx, dy):
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("S", x, y, dx, dy))
-    
-
-#listener = Listener()
-#listener.start()
-#while True:
-#    listener.fetch()
-    
-#listener.stop()

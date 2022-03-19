@@ -1,14 +1,10 @@
-from externals.vidgear.gears import ScreenGear
 from externals.vidgear.gears import NetGear
 from inputListener import Listener
-import asyncio
 import cv2
-import time
-import numpy
+from time import perf_counter
 from utils import *
 from threading import Thread
 from PyQt5.QtCore import pyqtSignal
-
 
 
 class Client():
@@ -45,7 +41,7 @@ class Client():
         counter = 0
         frames = 0
         while self.__running:
-            frameStart = time.perf_counter()
+            frameStart = perf_counter()
             #instructionQueue = listener.fetch()
 
             data, frame = self.client.recv(return_data=None)
@@ -58,7 +54,7 @@ class Client():
             self.win.label.updated.emit(frame)
             counter += 1
 
-            frameEnd = time.perf_counter()
+            frameEnd = perf_counter()
             #halt(minFrameDelta - (frameEnd - frameStart))
             frames += perf_counter() - frameStart
             #print(1/ (frameWaitPeriodEnd - frameStart))

@@ -1,7 +1,5 @@
-import sys
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout, QLabel, QRadioButton, QPushButton, QWidget
+from PyQt5.QtCore import Qt
 from UI.CustomWidgets.ComboBoxes import SortedComboBox
 from os.path import exists, splitext, dirname, join
 

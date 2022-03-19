@@ -20,9 +20,9 @@ estimate = 0.01
 #stops code excecution for precisely {seconds} seconds with high cpu usage
 def SpinLock(seconds):
     end = 0
-    start = time.perf_counter()
+    start = perf_counter()
     while end - start < seconds:
-        end = time.perf_counter()
+        end = perf_counter()
         
     return
 
@@ -32,9 +32,9 @@ def SpinLock(seconds):
 #stops code excecution for precisely {seconds} seconds with minimal cpu usage
 def halt(seconds):
     while seconds > estimate:
-        start = time.perf_counter()
+        start = perf_counter()
         time.sleep(0.001)
-        end = time.perf_counter()
+        end = perf_counter()
         seconds -= (end - start)
 
     SpinLock(seconds)
@@ -43,14 +43,14 @@ def halt(seconds):
 def SendVideoStream():
     global frameSum
     for i in range(10000):
-        frameStart = time.perf_counter()
+        frameStart = perf_counter()
         img = sct.grab(monitor)
         #cv2.imshow("stream", np.array(img))
-        frameEnd = time.perf_counter()
+        frameEnd = perf_counter()
         frameTimeElapsed = frameEnd - frameStart
         #print(abs(minFrameDelta - frameTimeElapsed))
         halt(minFrameDelta - frameTimeElapsed)
-        frameWaitPeriodEnd = time.perf_counter()
+        frameWaitPeriodEnd = perf_counter()
         frameSum += frameWaitPeriodEnd - frameStart
         #print(frameWaitPeriodEnd - frameStart)
 
@@ -99,16 +99,14 @@ from externals.vidgear.gears import NetGear
 from collections import deque
 from executor import Executor
 from utils import *
-from PIL import Image
 import cv2
-import time
-import numpy
+from time import perf_counter
+from numpy import flip
 
 
 
 class Server():
     def __init__(self, ip):
-        print(ip)
         self.resolution = (1280, 960)
 
         self.executor = Executor()
@@ -143,21 +141,21 @@ class Server():
         framesTotalTime = 0
         counter = 0
         while self.__running:
-            frameStart = time.perf_counter()
+            frameStart = perf_counter()
             frame = self.stream.read()
-            frame = numpy.flip(frame[:, :, :3], 2)
+            frame = flip(frame[:, :, :3], 2)
             frame = cv2.resize(frame, self.resolution, interpolation=cv2.INTER_LANCZOS4)
             return_data = self.server.send(frame, "a")
             if return_data:
                 self.executor.execute(deque(return_data))
 
             counter += 1
-            frameEnd = time.perf_counter()
+            frameEnd = perf_counter()
 
             #halt(minFrameDelta - (frameEnd - frameStart))
-            #framesTotalTime += time.perf_counter() - frameStart
+            #framesTotalTime += perf_counter() - frameStart
             #cv2.imshow("frame", frame)
-            #frameWaitPeriodEnd = time.perf_counter()
+            #frameWaitPeriodEnd = perf_counter()
             #key = cv2.waitKey(1) & 0xFF
             #if key == ord("q"):
             #    break
