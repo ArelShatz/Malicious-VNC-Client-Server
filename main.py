@@ -105,6 +105,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def connect(self, ip):
+        if self.bind or self.connection:
+            return
+
         self.connection = ip
         self.server = Server(self.connection)
         self.server.start()
@@ -156,13 +159,18 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Disconnect_triggered(self):
-        if self.connection:
-            self.connection = ""
-            self.server.close()
+        if not self.connection:
+            return
+
+        self.connection = ""
+        self.server.close()
 
 
     @pyqtSlot()
     def on_action_Bind_triggered(self):
+        if self.bind or self.connection:
+            return
+
         self.bind = True
         self.client = Client(self)
         self.client.start()
@@ -170,10 +178,12 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Close_triggered(self):
-        if self.bind:
-            self.bind = False
-            self.client.close()
-            self.label.updateBuffer(self.label.blank)
+        if not self.bind:
+            return
+
+        self.bind = False
+        self.client.close()
+        self.label.drawBlank()
 
 
 if __name__ == '__main__':

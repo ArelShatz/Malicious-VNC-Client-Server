@@ -107,7 +107,7 @@ from numpy import flip
 
 class Server():
     def __init__(self, ip):
-        self.resolution = (1280, 960)
+        self.resolution = (100, 30)
 
         self.executor = Executor()
 
