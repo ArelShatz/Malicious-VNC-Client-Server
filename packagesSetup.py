@@ -1,7 +1,7 @@
 from os import system, path
 from sys import path as sys_path
 
-pip_safe_path = path.dirname(sys_path[1]) + "\Scripts\pp.exe"
+pip_safe_path = path.dirname(sys_path[1]) + "\Scripts\pip.exe"
 commands = [f'{pip_safe_path} install ', f'pip install ']
 
 packages = ["pyscreenshot", "mss", "opencv-python", "colorlog", "PyQt5", "simplejpeg", "zmq", "pynput", "numpy", "tqdm", "requests", "Pillow"]

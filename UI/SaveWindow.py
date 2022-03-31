@@ -90,14 +90,18 @@ class SaveWin(QWidget):
 
 
     def LoadDefaultPath(self):
-        with open("lastPath.txt", 'r') as pathFile:
-            lastPath = pathFile.read()
-            if lastPath:
-                self.defaultPath = lastPath
-                
-            else:
-                self.defaultPath = "C:\\untitled.mp4"
+        try:
+            with open("lastPath.txt", 'r') as pathFile:
+                lastPath = pathFile.read()
+                if lastPath and exists(lastPath):
+                    self.defaultPath = lastPath
+                    
+                else:
+                    self.defaultPath = "C:\\untitled.mp4"
 
+        except FileNotFoundError:
+            lastPathFile = open("lastPath.txt", 'w')
+            lastPathFile.close()
 
 
 def DirOf(Path):

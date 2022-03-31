@@ -44,7 +44,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.addAction(self.action_Bind)
         self.addAction(self.action_Close)
 
-
         self.fullscreenExitShortcut = QShortcut('ESC', self)
         self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #change 3rd bit (fullscreen flag) to 0 (XXXX & 1011(11) = X0XX)
 
@@ -63,7 +62,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def ToggleFullscreen(self, newState):
-        self.setWindowState(newState);
+        self.setWindowState(newState)
         self.menubar.setHidden(newState)
 
 
