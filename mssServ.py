@@ -97,8 +97,7 @@ with mss() as sct:
 from externals.vidgear.gears import ScreenGear
 from externals.vidgear.gears import NetGear
 from collections import deque
-from executor import Executor
-from utils import *
+from helpers.executor import Executor
 import cv2
 from time import perf_counter
 from numpy import flip
@@ -107,7 +106,7 @@ from numpy import flip
 
 class Server():
     def __init__(self, ip):
-        self.resolution = (100, 30)
+        self.resolution = (1200, 900)
 
         self.executor = Executor()
 

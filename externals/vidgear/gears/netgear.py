@@ -28,8 +28,8 @@ import secrets
 import numpy as np
 import logging as log
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0]))))
-from utils import *
-from inputListener import Listener
+from helpers.utils import *
+from helpers.inputListener import Listener
 from threading import Thread
 from collections import deque
 from os.path import expanduser

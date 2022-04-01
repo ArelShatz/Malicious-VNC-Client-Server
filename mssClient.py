@@ -1,8 +1,7 @@
 from externals.vidgear.gears import NetGear
-from inputListener import Listener
+from helpers.inputListener import Listener
 import cv2
 from time import perf_counter
-from utils import *
 from threading import Thread
 from PyQt5.QtCore import pyqtSignal
 
