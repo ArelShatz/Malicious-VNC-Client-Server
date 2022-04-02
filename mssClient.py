@@ -43,7 +43,7 @@ class Client():
             frameStart = perf_counter()
             #instructionQueue = listener.fetch()
 
-            data, frame = self.client.recv(return_data=None)
+            data, frame = self.client.recv(return_data=[list(self.win.cmdQueue)])
             #frame = numpy.frombuffer(frame, dtype=numpy.uint8)
 
             #frame = frame.reshape(1200, 1600, 3)

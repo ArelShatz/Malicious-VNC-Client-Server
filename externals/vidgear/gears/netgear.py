@@ -28,7 +28,6 @@ import secrets
 import numpy as np
 import logging as log
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(sys.path[0]))))
-from helpers.utils import *
 from helpers.inputListener import Listener
 from threading import Thread
 from collections import deque
@@ -1129,7 +1128,7 @@ class NetGear:
                             track=self.__msg_track,
                         )
                     else:
-                        self.__return_data = self.__inpListener.fetch()
+                        self.__return_data.append(self.__inpListener.fetch())
                         return_dict = (
                             dict() if self.__bi_mode else dict(port=self.__port)
                         )
