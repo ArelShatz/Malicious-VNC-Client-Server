@@ -15,6 +15,11 @@ class DisplayBuffer(QLabel):
                 self.blank = cvtColor(zeros((100, 100), dtype=uint8), 8)
                 #self.updateBuffer(self.blank)
 
+                self.resize(100, 100)
+                print(self.width())
+                self.blank = cvtColor(zeros((self.width(), self.height()), dtype=uint8), 8)
+                #self.drawBlank()
+
 
         def updateBuffer(self, frame):
                 height, width, channel = frame.shape
@@ -38,4 +43,4 @@ class DisplayBuffer(QLabel):
 
 
         def drawBlank(self):
-        		self.updateBuffer(self.blank)
+        	self.updateBuffer(self.blank)
