@@ -42,6 +42,8 @@ if not (zmq is None):
 msgpack = import_dependency_safe("msgpack", error="silent")
 m = import_dependency_safe("msgpack_numpy", error="silent")
 uvloop = import_dependency_safe("uvloop", error="silent")
+simplejpeg = import_dependency_safe("simplejpeg", error="silent", min_version="1.6.1")
+
 
 # define logger
 logger = log.getLogger("NetGear_Async")
@@ -130,6 +132,9 @@ class NetGear_Async:
         import_dependency_safe("zmq" if zmq is None else "", min_version="4.0")
         import_dependency_safe("msgpack" if msgpack is None else "")
         import_dependency_safe("msgpack_numpy" if m is None else "")
+        import_dependency_safe(
+            "simplejpeg" if simplejpeg is None else "", error="log", min_version="1.6.1"
+        )
 
         # enable logging if specified
         self.__logging = logging
@@ -183,6 +188,19 @@ class NetGear_Async:
         # define Bidirectional mode
         self.__bi_mode = False  # handles Bidirectional mode state
 
+        # define frame-compression handler
+        self.__jpeg_compression = (
+            True if not (simplejpeg is None) else False
+        )
+        # enabled by default for all connections if simplejpeg is installed
+        self.__jpeg_compression_quality = 90  # 90% quality
+        self.__jpeg_compression_fastdct = True  # fastest DCT on by default
+        self.__jpeg_compression_fastupsample = False  # fastupsample off by default
+        self.__jpeg_compression_colorspace = "BGR"  # use BGR colorspace by default
+
+        self.__rle_compression = False
+        self.__rle_compression__strength = 6
+
         # assign timeout for Receiver end
         if timeout and isinstance(timeout, (int, float)):
             self.__timeout = float(timeout)
@@ -233,6 +251,55 @@ class NetGear_Async:
                 logger.error("`bidirectional_mode` value is invalid!")
             # clean
             del options["bidirectional_mode"]
+
+        for key, value in options.items():
+            if (
+                key == "jpeg_compression"
+                and not (simplejpeg is None)
+                and isinstance(value, (bool, str))
+            ):
+                if isinstance(value, str) and value.strip().upper() in [
+                    "RGB",
+                    "BGR",
+                    "RGBX",
+                    "BGRX",
+                    "XBGR",
+                    "XRGB",
+                    "GRAY",
+                    "RGBA",
+                    "BGRA",
+                    "ABGR",
+                    "ARGB",
+                    "CMYK",
+                ]:
+                    # set encoding colorspace
+                    self.__jpeg_compression_colorspace = value.strip().upper()
+                    # enable frame-compression encoding value
+                    self.__jpeg_compression = True
+                else:
+                    # enable frame-compression encoding value
+                    self.__jpeg_compression = value
+            elif key == "jpeg_compression_quality" and isinstance(value, (int, float)):
+                # set valid jpeg quality
+                if value >= 10 and value <= 100:
+                    self.__jpeg_compression_quality = int(value)
+                else:
+                    logger.warning("Skipped invalid `jpeg_compression_quality` value!")
+            elif key == "jpeg_compression_fastdct" and isinstance(value, bool):
+                # enable jpeg fastdct
+                self.__jpeg_compression_fastdct = value
+            elif key == "jpeg_compression_fastupsample" and isinstance(value, bool):
+                # enable jpeg  fastupsample
+                self.__jpeg_compression_fastupsample = value
+
+            elif key == "rle_compression" and isinstance(value, bool):
+                # enable rle compression
+                self.__rle_compression = value
+
+
+            elif key == "rle_compression_strength" and isinstance(value, int):
+                # set rle compression strength
+                self.__rle_compression_strength = value
 
         # define messaging asynchronous Context
         self.__msg_context = zmq.asyncio.Context()
@@ -437,6 +504,26 @@ class NetGear_Async:
             if not (frame.flags["C_CONTIGUOUS"]):
                 # otherwise make it
                 frame = np.ascontiguousarray(frame, dtype=frame.dtype)
+
+            if self.__jpeg_compression:
+                if self.__jpeg_compression_colorspace == "GRAY":
+                    if frame.ndim == 2:
+                        # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
+                        frame = np.expand_dims(frame, axis=2)
+                    frame = simplejpeg.encode_jpeg(
+                        frame,
+                        quality=self.__jpeg_compression_quality,
+                        colorspace=self.__jpeg_compression_colorspace,
+                        fastdct=self.__jpeg_compression_fastdct,
+                    )
+                else:
+                    frame = simplejpeg.encode_jpeg(
+                        frame,
+                        quality=self.__jpeg_compression_quality,
+                        colorspace=self.__jpeg_compression_colorspace,
+                        colorsubsampling="422",
+                        fastdct=self.__jpeg_compression_fastdct,
+                    )
 
             # create data dict
             data_dict = dict(
