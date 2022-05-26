@@ -35,8 +35,8 @@ defaultSettings = {
                 "outputFile": dirname(realpath(__file__)) + r"\Recordings",
                 "theme": "White (default)",
                 "fps limit": "24",
-                "resolution width": "800",
-                "resolution height": "600",
+                "resolution width": "1200",
+                "resolution height": "900",
                 "showFps": False
             }
 
