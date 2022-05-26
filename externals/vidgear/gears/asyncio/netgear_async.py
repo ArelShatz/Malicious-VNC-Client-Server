@@ -683,6 +683,35 @@ class NetGear_Async:
                 framemsg_encoded[0], use_list=False, object_hook=m.decode
             )
 
+            if data["rle"]:
+                frame = zlib.decompress(frame)
+                
+            # check if encoding was enabled
+            if data["compression"]:
+                # decode JPEG frame
+                frame = simplejpeg.decode_jpeg(
+                    frame,
+                    colorspace=data["compression"]["colorspace"],
+                    fastdct=self.__jpeg_compression_fastdct
+                    or data["compression"]["dct"],
+                    fastupsample=self.__jpeg_compression_fastupsample
+                    or data["compression"]["ups"],
+                )
+                # check if valid frame returned
+                if frame is None:
+                    self.__terminate = True
+                    # otherwise raise error and exit
+                    raise RuntimeError(
+                        "[NetGear:ERROR] :: Received compressed JPEG frame decoding failed"
+                    )
+                if data["compression"]["colorspace"] == "GRAY" and frame.ndim == 3:
+                    # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
+                    frame = np.squeeze(frame, axis=2)
+            else:
+                # recover and reshape frame from buffer
+                frame_buffer = np.frombuffer(msg_data, dtype=data["dtype"])
+                frame = frame_buffer.reshape(data["shape"])
+
             # check if bidirectional patterns
             if self.__msg_pattern < 2:
                 # handle bidirectional data transfer if enabled

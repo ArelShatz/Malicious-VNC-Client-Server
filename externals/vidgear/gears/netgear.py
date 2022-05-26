@@ -961,8 +961,6 @@ class NetGear:
 
         # keep looping infinitely until the thread is terminated
         while not self.__terminate:
-            frameStart = perf_counter()
-
             # check queue buffer for overflow
             if len(self.__queue) >= 96:
                 # stop iterating if overflowing occurs
@@ -1046,7 +1044,7 @@ class NetGear:
                     )
                 continue
 
-            frame = self.__msg_socket.recv(
+            rectImgs = self.__msg_socket.recv_multipart(
                 flags=self.__msg_flag | zmq.DONTWAIT,
                 copy=self.__msg_copy,
                 track=self.__msg_track,
@@ -1142,8 +1140,6 @@ class NetGear:
                         #if self.__return_data:
                         #    if len(self.__return_data) != 0:
                         #        print(self.__return_data)
-
-                        #print(self.__return_data)
                         
                         self.__msg_socket.send_json(return_dict, self.__msg_flag)
                         self.__return_data = []
@@ -1157,34 +1153,38 @@ class NetGear:
                 if self.__return_data:
                     logger.warning("`return_data` is disabled for this pattern!")
 
-            if msg_json["rle"]:
-                frame = zlib.decompress(frame)
-                
-            # check if encoding was enabled
-            if msg_json["compression"]:
-                # decode JPEG frame
-                frame = simplejpeg.decode_jpeg(
-                    frame,
-                    colorspace=msg_json["compression"]["colorspace"],
-                    fastdct=self.__jpeg_compression_fastdct
-                    or msg_json["compression"]["dct"],
-                    fastupsample=self.__jpeg_compression_fastupsample
-                    or msg_json["compression"]["ups"],
-                )
-                # check if valid frame returned
-                if frame is None:
-                    self.__terminate = True
-                    # otherwise raise error and exit
-                    raise RuntimeError(
-                        "[NetGear:ERROR] :: Received compressed JPEG frame decoding failed"
+            rects = msg_json["rects"]
+            for ind, (chunk, rect) in enumerate(zip(rectImgs, rects)):
+                if msg_json["rle"]:
+                    chunk = zlib.decompress(chunk)
+                    
+                # check if encoding was enabled
+                if msg_json["compression"]:
+                    # decode JPEG frame
+                    chunk = simplejpeg.decode_jpeg(
+                        chunk,
+                        colorspace=msg_json["compression"]["colorspace"],
+                        fastdct=self.__jpeg_compression_fastdct
+                        or msg_json["compression"]["dct"],
+                        fastupsample=self.__jpeg_compression_fastupsample
+                        or msg_json["compression"]["ups"],
                     )
-                if msg_json["compression"]["colorspace"] == "GRAY" and frame.ndim == 3:
-                    # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
-                    frame = np.squeeze(frame, axis=2)
-            else:
-                # recover and reshape frame from buffer
-                frame_buffer = np.frombuffer(msg_data, dtype=msg_json["dtype"])
-                frame = frame_buffer.reshape(msg_json["shape"])
+                    # check if valid frame returned
+                    if chunk is None:
+                        self.__terminate = True
+                        # otherwise raise error and exit
+                        raise RuntimeError(
+                            "[NetGear:ERROR] :: Received compressed JPEG frame decoding failed"
+                        )
+                    if msg_json["compression"]["colorspace"] == "GRAY" and chunk.ndim == 3:
+                        # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
+                        chunk = np.squeeze(chunk, axis=2)
+                else:
+                    # recover and reshape frame from buffer
+                    frame_buffer = np.frombuffer(msg_data, dtype=msg_json["dtype"])
+                    chunk = frame_buffer.reshape(msg_json["shape"])
+
+                rectImgs[ind] = (chunk, rect)
 
             # check if multiserver_mode
             if self.__multiserver_mode:
@@ -1201,12 +1201,12 @@ class NetGear:
             elif self.__bi_mode:
                 if msg_json["message"]:
                     # append grouped frame and data to queue
-                    self.__queue.append((msg_json["message"], frame))
+                    self.__queue.append((msg_json["message"], rectImgs))
                 else:
-                    self.__queue.append((None, frame))
+                    self.__queue.append((None, rectImgs))
             else:
                 # otherwise append recovered frame to queue
-                self.__queue.append(frame)
+                self.__queue.append(rectImgs)
 
 
         #halt(minFrameDelta - (perf_counter() - frameStart))

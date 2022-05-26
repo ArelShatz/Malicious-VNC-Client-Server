@@ -3,7 +3,7 @@ from sys import argv, exit as sysExit, path as sysPath
 sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton, QMenu
-from PyQt5.QtCore import Qt, pyqtSlot, QState
+from PyQt5.QtCore import Qt, pyqtSlot, QState, pyqtSignal
 from PyQt5.QtGui import QKeySequence, QIcon, QPalette, QColor, QImage
 from UI.main_window_ui import Ui_MainWindow
 from json import load, dump, decoder
@@ -18,7 +18,7 @@ from mssServ import Server
 from mssClient import Client
 
 from cv2 import cvtColor
-from numpy import zeros, uint8, ones
+from numpy import zeros, uint8, ones, ndarray
 from winreg import OpenKeyEx, CloseKey, SetValueEx, REG_SZ, HKEY_CURRENT_USER, KEY_SET_VALUE
 from collections import deque
 
@@ -33,7 +33,7 @@ palettes = {
 
 
 defaultSettings = {
-                "outputFile": "",
+                "outputFile": dirname(realpath(__file__)) + r"\Recordings",
                 "theme": "White (default)",
                 "fps limit": "24",
                 "resolution width": "800",
@@ -50,6 +50,16 @@ class Window(QMainWindow, Ui_MainWindow):
         self.menuMalicious.menuAction().setVisible(False)
 
         self.logger = None
+        #self.addAction(self.action_Save_To)
+        #self.(self.action_UI)
+        #self.addAction(self.action_Exit)
+        #self.addAction(self.action_Fullscreen)
+        #self.addAction(self.action_Connect)
+        #self.addAction(self.action_Disconnect)
+        #self.addAction(self.action_Bind)
+        #self.addAction(self.action_Close)
+        #self.menuMalicious.menuAction().setVisible(False)
+
         self.cmdQueue = deque(maxlen=1024)
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
@@ -66,10 +76,13 @@ class Window(QMainWindow, Ui_MainWindow):
         self.ChangeTheme(tempTheme)
 
         self.label.updated.connect(self.label.updateBuffer)
-        self.label.updateBuffer(cvtColor(ones((600, 800), uint8), 8))
+        self.label.updateBuffer([[cvtColor(zeros((900, 1200), uint8), 8), (0, 0, 1200, 900)]])
 
         self.bind = False
         self.connection = ""
+
+        self.rec = False
+        self.menuRecord.menuAction().setEnabled(False)
 
 
     def ToggleFullscreen(self, newState):
@@ -202,6 +215,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.client = Client(self)
         self.client.start()
         self.menuMalicious.menuAction().setVisible(True)
+        self.menuRecord.menuAction().setEnabled(True)
+        self.action_Save_To.setEnabled(True)
 
 
     @pyqtSlot()
@@ -211,8 +226,22 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.bind = False
         self.client.close()
-        self.label.drawBlank()
+        #self.label.drawBlank()
         self.menuMalicious.menuAction().setVisible(False)
+        self.menuRecord.menuAction().setEnabled(False)
+        self.action_Save_To.setEnabled(False)
+        self.rec = False
+        self.label.updateBuffer([[cvtColor(zeros((900, 1200), uint8), 8), (0, 0, 1200, 900)]])
+
+
+    @pyqtSlot()
+    def on_action_Start_Recording_triggered(self):
+        self.rec = True
+
+
+    @pyqtSlot()
+    def on_action_Stop_Recording_triggered(self):
+        self.rec = False
 
 
     @pyqtSlot()
@@ -272,6 +301,9 @@ if __name__ == '__main__':
     s = perf_counter()
     main()
     print(perf_counter() - s)
+
+    yappi.start()
+    main()
     yappi.stop()
 
     threads = yappi.get_thread_stats()
