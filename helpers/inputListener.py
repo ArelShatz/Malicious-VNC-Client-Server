@@ -84,6 +84,13 @@ class Listener():
         if not self.grabMouseInput:
             return
 
+        if self.blockInput:
+            self.__mouseListener._suppress = True
+
+        else:
+            self.__mouseListener._suppress = False
+
+
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("M", x, y))
 
@@ -92,6 +99,12 @@ class Listener():
         if not self.grabMouseInput:
             return
 
+        #if self.blockInput:
+        #    self.__mouseListener._suppress = True
+
+        #else:
+        #    self.__mouseListener._suppress = False
+
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("C", x, y, button.value, pressed))
 
@@ -99,6 +112,12 @@ class Listener():
     def onScroll(self, x, y, dx, dy):
         if not self.grabMouseInput:
             return
+
+        #if self.blockInput:
+        #    self.__mouseListener._suppress = True
+
+        #else:
+        #    self.__mouseListener._suppress = False
 
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("S", x, y, dx, dy))

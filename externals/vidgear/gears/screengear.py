@@ -241,13 +241,13 @@ class ScreenGear:
                             self.__capture_object.grab(self.__mss_capture_instance)
                         )
                         #get cursor image
-                        flags, hcursor, (cx,cy) = GetCursorInfo()
-                        hdc = CreateDCFromHandle(GetDC(0))
-                        hbmp = CreateBitmap()
-                        hbmp.CreateCompatibleBitmap(hdc, 36, 36)
-                        hdc = hdc.CreateCompatibleDC()
-                        hdc.SelectObject(hbmp)
                         try:
+                            flags, hcursor, (cx,cy) = GetCursorInfo()
+                            hdc = CreateDCFromHandle(GetDC(0))
+                            hbmp = CreateBitmap()
+                            hbmp.CreateCompatibleBitmap(hdc, 36, 36)
+                            hdc = hdc.CreateCompatibleDC()
+                            hdc.SelectObject(hbmp)
                             hdc.DrawIcon((0,0), hcursor)
                             DestroyIcon(hcursor)
 

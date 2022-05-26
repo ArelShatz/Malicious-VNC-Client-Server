@@ -89,7 +89,7 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="action_Security"/>
+    <addaction name="action_General"/>
     <addaction name="action_UI"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -179,9 +179,9 @@
     <string>&amp;Disconnect</string>
    </property>
   </action>
-  <action name="action_Security">
+  <action name="action_General">
    <property name="text">
-    <string>&amp;Security...</string>
+    <string>&amp;General...</string>
    </property>
   </action>
   <action name="action_UI">

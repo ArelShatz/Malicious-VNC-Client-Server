@@ -32,7 +32,6 @@ class Executor():
                 self.__mouseCtrl.position = (item[1], item[2])
 
             elif cmd == "P":
-                print(item[1], type(item[1]))
                 self.__keyboardCtrl.press(KeyCode.from_vk(item[1]))
 
             elif cmd == "R":

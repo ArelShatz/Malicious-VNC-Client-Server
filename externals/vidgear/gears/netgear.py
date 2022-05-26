@@ -238,8 +238,8 @@ class NetGear:
 
         self.__prevFrame = None
 
-        self.__inpListener = Listener(grabKeyInput=True, grabMouseInput=True, blockInput=False)
-        self.__inpListener.start()
+        self.inpListener = Listener(grabKeyInput=True, grabMouseInput=True, blockInput=False)
+        self.inpListener.start()
 
         # additional settings for reliability
         if pattern < 2:
@@ -1127,7 +1127,7 @@ class NetGear:
                             track=self.__msg_track,
                         )
                     else:
-                        self.__return_data.append(self.__inpListener.fetch())
+                        self.__return_data.append(self.inpListener.fetch())
                         return_dict = (
                             dict() if self.__bi_mode else dict(port=self.__port)
                         )
@@ -1532,7 +1532,7 @@ class NetGear:
         Safely terminates the threads, and NetGear resources.
         """
         # log it
-        self.__inpListener.stop()
+        self.inpListener.stop()
         self.__logging and logger.debug(
             "Terminating various {} Processes.".format(
                 "Receive Mode" if self.__receive_mode else "Send Mode"

