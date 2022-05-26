@@ -53,8 +53,8 @@ class Client():
                 continue
 
             data, rectImgs = recv_data
-            while self.win.cmdQueue:
-                self.win.cmdQueue.popleft()
+            #while self.win.cmdQueue:
+            #    print(self.win.cmdQueue.popleft())
 
             #frame = numpy.frombuffer(frame, dtype=numpy.uint8)
 
@@ -62,8 +62,6 @@ class Client():
             #print(frame.size)
             #cv2.imshow("Output Frame", frame)
             #cv2.waitKey(1)
-            if frame:
-                self.win.label.updated.emit(frame)
             if isinstance(rectImgs[0], Frame):
                 continue
 
@@ -71,7 +69,7 @@ class Client():
             if self.win.rec:
                 self.writer.write(self.win.label.cvVer)
 
-            if data is not None:
+            if data is not None and logger is not None:
                 data = deque(data)
                 while data:
                     item = data.popleft()

