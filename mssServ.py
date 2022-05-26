@@ -19,8 +19,6 @@ class Server():
 
         self.executor = Executor()
 
-        self.inpListener = Listener(grabKeyInput=False, grabMouseInput=False, blockInput=False)
-
         options = {"jpeg_compression": True,
                    "jpeg_compression_fastdct": True,
                    "jpeg_compression_fastupsample": True,
@@ -32,7 +30,7 @@ class Server():
         }
 
         self.server = NetGear(
-            address="192.168.1.132",
+            address=ip,
             port="5900",
             protocol="tcp",
             pattern=1,
@@ -55,8 +53,6 @@ class Server():
 
 
     def __start(self):
-        self.inpListener.start()
-
         self.additional_data = lambda: None
         while self.__running:
             frame = self.stream.read()
@@ -114,6 +110,7 @@ class Server():
 
                 else:
                     inputQueue = deque(data[0])
+
                     self.executor.execute(inputQueue)
 
             #halt(minFrameDelta - (frameEnd - frameStart))

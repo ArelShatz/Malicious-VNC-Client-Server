@@ -81,7 +81,7 @@ class ScreenGear:
         # enable logging if specified:
         self.__logging = logging if isinstance(logging, bool) else False
 
-        self.minFrameDelta = 0.041666
+        self.minFrameDelta = 0.033333
 
         # create monitor instance for the user-defined monitor
         self.__monitor_instance = None

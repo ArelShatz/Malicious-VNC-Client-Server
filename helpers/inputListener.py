@@ -13,23 +13,24 @@ class Listener():
         self.blockInput = blockInput
 
         self.__queue = deque(maxlen=1024)
-        self.__keyboardListener = keyboardListener(
+        self.keyboardListener = keyboardListener(
 		on_press=self.onPress,
 		on_release=self.onRelease,
 		win32_event_filter=self.win32_keyBlock,
                 suppress=False)
 
 
-        self.__mouseListener = mouseListener(
+        self.mouseListener = mouseListener(
                 on_move=self.onMove,
                 on_click=self.onClick,
                 on_scroll=self.onScroll,
+                win32_event_filter=self.win32_mouseBlock,
                 suppress=False)
 
 
     def start(self):
-        self.__keyboardListener.start()
-        self.__mouseListener.start()
+        self.keyboardListener.start()
+        self.mouseListener.start()
 
 
     def fetch(self):
@@ -39,8 +40,8 @@ class Listener():
 
 
     def stop(self):
-        self.__keyboardListener.stop()
-        self.__mouseListener.stop()
+        self.keyboardListener.stop()
+        self.mouseListener.stop()
         
         while len(self.__queue) != 0:
             self.__queue.popleft()
@@ -71,10 +72,10 @@ class Listener():
 
     def win32_keyBlock(self, msg, data):
         if self.blockInput:
-            self.__keyboardListener._suppress = True
+            self.keyboardListener._suppress = True
 
         else:
-            self.__keyboardListener._suppress = False
+            self.keyboardListener._suppress = False
 
         return True
 
@@ -84,13 +85,6 @@ class Listener():
         if not self.grabMouseInput:
             return
 
-        if self.blockInput:
-            self.__mouseListener._suppress = True
-
-        else:
-            self.__mouseListener._suppress = False
-
-
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("M", x, y))
 
@@ -98,12 +92,6 @@ class Listener():
     def onClick(self, x, y, button, pressed):
         if not self.grabMouseInput:
             return
-
-        #if self.blockInput:
-        #    self.__mouseListener._suppress = True
-
-        #else:
-        #    self.__mouseListener._suppress = False
 
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("C", x, y, button.value, pressed))
@@ -113,11 +101,15 @@ class Listener():
         if not self.grabMouseInput:
             return
 
-        #if self.blockInput:
-        #    self.__mouseListener._suppress = True
-
-        #else:
-        #    self.__mouseListener._suppress = False
-
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("S", x, y, dx, dy))
+
+
+    def win32_mouseBlock(self, msg, data):
+        if self.blockInput:
+            self.mouseListener._suppress = True
+
+        else:
+            self.mouseListener._suppress = False
+
+        return True
