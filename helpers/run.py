@@ -1,5 +1,10 @@
 from mssServ import Server
 
-if __name__ == "__main__":
+
+def main():
     s = Server()
     s.start()
+
+
+if __name__ == "__main__":
+    main()

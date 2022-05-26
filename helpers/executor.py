@@ -25,33 +25,30 @@ class Executor():
 
 
     def __execute(self, queue):
-        while self.__running:
-            if len(queue) != 0:
-                item = queue.popleft()
-                cmd = item[0]
-                if cmd == "M":
-                    self.__mouseCtrl.position = (item[1], item[2])
+        while queue:
+            item = queue.popleft()
+            cmd = item[0]
+            if cmd == "M":
+                self.__mouseCtrl.position = (item[1], item[2])
 
-                elif cmd == "P":
-                    self.__keyboardCtrl.press(KeyCode.from_vk(item[1]))
+            elif cmd == "P":
+                print(item[1], type(item[1]))
+                self.__keyboardCtrl.press(KeyCode.from_vk(item[1]))
 
-                elif cmd == "R":
-                    self.__keyboardCtrl.release(KeyCode.from_vk(item[1]))
+            elif cmd == "R":
+                self.__keyboardCtrl.release(KeyCode.from_vk(item[1]))
 
-                elif cmd == "C":
-                    self.__mouseCtrl.position = (item[1], item[2])
-                    if item[4]:
-                        self.__mouseCtrl.press(Button(tuple(item[3])))
+            elif cmd == "C":
+                self.__mouseCtrl.position = (item[1], item[2])
+                if item[4]:
+                    self.__mouseCtrl.press(Button(tuple(item[3])))
 
-                    else:
-                        self.__mouseCtrl.release(Button(tuple(item[3])))
+                else:
+                    self.__mouseCtrl.release(Button(tuple(item[3])))
 
-                elif cmd == "S":
-                    self.__mouseCtrl.position = (item[1], item[2])
-                    self.__mouseCtrl.scroll(item[3], item[4])
-
-            else:
-                sleep(0.0001)
+            elif cmd == "S":
+                self.__mouseCtrl.position = (item[1], item[2])
+                self.__mouseCtrl.scroll(item[3], item[4])
 
 
     def close(self):
@@ -62,8 +59,8 @@ class Executor():
         self.__mouseCtrl.release(Button.left)
         self.__mouseCtrl.release(Button.right)
         self.__mouseCtrl.release(Button.middle)
-        self.__mouseCtrl.release(Button.unknown)
+        #self.__mouseCtrl.release(Button.unknown)
         self.__mouseCtrl.release(Button.x1)
         self.__mouseCtrl.release(Button.x2)
-        for i in range(255):
+        for i in range(1, 255):
             self.__keyboardCtrl.release(KeyCode.from_vk(i))

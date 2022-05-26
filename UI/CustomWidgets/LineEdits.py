@@ -35,3 +35,25 @@ class IPLineEdit(QLineEdit):
 
         else:
             self.text = text
+
+
+
+class IntLineEdit(QLineEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.text = ""
+        self.textEdited.connect(self.CheckText)
+
+
+    def CheckText(self, text):
+        if not text:
+            self.text = text
+            return
+
+        try:
+            int(text)
+            self.text = text
+
+        except:
+            self.setText(self.text)

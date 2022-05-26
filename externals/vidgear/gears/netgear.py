@@ -144,6 +144,7 @@ class NetGear:
 
         # enable logging if specified
         self.__logging = True if logging else False
+        self.counter = 0
 
         # define valid messaging patterns => `0`: zmq.PAIR, `1`:(zmq.REQ,zmq.REP), and `1`:(zmq.SUB,zmq.PUB)
         valid_messaging_patterns = {
@@ -237,7 +238,7 @@ class NetGear:
 
         self.__prevFrame = None
 
-        self.__inpListener = Listener()
+        self.__inpListener = Listener(grabKeyInput=True, grabMouseInput=True, blockInput=False)
         self.__inpListener.start()
 
         # additional settings for reliability
@@ -965,7 +966,7 @@ class NetGear:
             # check queue buffer for overflow
             if len(self.__queue) >= 96:
                 # stop iterating if overflowing occurs
-                time.sleep(0.000001)
+                time.sleep(0.00001)
                 continue
 
             if self.__pattern < 2:
@@ -1239,7 +1240,7 @@ class NetGear:
                 if len(self.__queue) > 0:
                     return self.__queue.popleft()
                 else:
-                    time.sleep(0.00001)
+                    time.sleep(0.0001)
                     continue
             except KeyboardInterrupt:
                 self.__terminate = True
@@ -1284,42 +1285,55 @@ class NetGear:
 
         # handle JPEG compression encoding
 
-        """if self.__prevFrame is None:
+        if self.__prevFrame is None:
             self.__prevFrame = np.zeros_like(frame)
             
-        else:
-            xored = cv2.bitwise_xor(frame, self.__prevFrame)
-            mask = cv2.inRange(xored, 1, 255)
-            contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-            rects = []
-            for contour in contours:
-                x, y, w, h = cv2.boundingRect(contour)
+        xored = cv2.bitwise_xor(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), cv2.cvtColor(self.__prevFrame, cv2.COLOR_BGR2GRAY))
+        blur = cv2.GaussianBlur(xored, (3,3), 0)
+        self.__prevFrame = frame.copy()
+        mask = cv2.inRange(blur, 1, 255)
+        contours = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        rects = []
+        rectImgs = []
+        for contour in contours:
+            #print(contour)
+            x, y, w, h = cv2.boundingRect(contour)
+            if w > 8 and h > 8:
+                chunk = frame[y:y+h, x:x+w]
+                #cv2.rectangle(frame, (x, y), (x+w, y+h), 255)
+        
+                if self.__jpeg_compression:
+                    if self.__jpeg_compression_colorspace == "GRAY":
+                        if chunk.ndim == 2:
+                            # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
+                            chunk = np.expand_dims(chunk, axis=2)
+                        chunk = simplejpeg.encode_jpeg(
+                            chunk,
+                            quality=self.__jpeg_compression_quality,
+                            colorspace=self.__jpeg_compression_colorspace,
+                            fastdct=self.__jpeg_compression_fastdct,
+                        )
+                    else:
+                        chunk = simplejpeg.encode_jpeg(
+                            np.ascontiguousarray(chunk),
+                            quality=self.__jpeg_compression_quality,
+                            colorspace=self.__jpeg_compression_colorspace,
+                            colorsubsampling="422",
+                            fastdct=self.__jpeg_compression_fastdct,
+                        )
+
+                if self.__rle_compression:
+                    chunk = zlib.compress(chunk, self.__rle_compression_strength)
+
                 rects.append((x, y, w, h))
-                rectImg = frame[y:y+h, x:x+w]"""
+                rectImgs.append(chunk)
 
-            
-        if self.__jpeg_compression:
-            if self.__jpeg_compression_colorspace == "GRAY":
-                if frame.ndim == 2:
-                    # patch for https://gitlab.com/jfolz/simplejpeg/-/issues/11
-                    frame = np.expand_dims(frame, axis=2)
-                frame = simplejpeg.encode_jpeg(
-                    frame,
-                    quality=self.__jpeg_compression_quality,
-                    colorspace=self.__jpeg_compression_colorspace,
-                    fastdct=self.__jpeg_compression_fastdct,
-                )
-            else:
-                frame = simplejpeg.encode_jpeg(
-                    frame,
-                    quality=self.__jpeg_compression_quality,
-                    colorspace=self.__jpeg_compression_colorspace,
-                    colorsubsampling="422",
-                    fastdct=self.__jpeg_compression_fastdct,
-                )
+        #cv2.imshow("", frame)
+        #cv2.waitKey(0)
+        if len(rectImgs) == 0:
+            rectImgs = [b'']
 
-        if self.__rle_compression:
-            frame = zlib.compress(frame, self.__rle_compression_strength)
+        #print(len(rectImgs))
 
         # check if multiserver_mode is activated and assign values with unique port
         msg_dict = dict(port=self.__port) if self.__multiserver_mode else dict()
@@ -1340,6 +1354,7 @@ class NetGear:
                 }
                 if self.__rle_compression
                 else False,
+                rects=rects,
                 message=message,
                 pattern=str(self.__pattern),
                 dtype=str(frame.dtype) if not (self.__jpeg_compression) else "",
@@ -1350,8 +1365,9 @@ class NetGear:
         # send the json dict
         self.__msg_socket.send_json(msg_dict, self.__msg_flag | zmq.SNDMORE)
         # send the frame array with correct flags
-        self.__msg_socket.send(
-            frame, flags=self.__msg_flag, copy=self.__msg_copy, track=self.__msg_track
+        self.counter += 1
+        self.__msg_socket.send_multipart(
+            rectImgs, flags=self.__msg_flag, copy=self.__msg_copy, track=self.__msg_track
         )
 
         # check if synchronous patterns, then wait for confirmation
@@ -1384,33 +1400,32 @@ class NetGear:
                                 "Client failed to respond on multiple attempts."
                             )
                         self.__terminate = True
-                        raise RuntimeError(
-                            "[NetGear:ERROR] :: Client(s) seems to be offline, Abandoning."
-                        )
+                        return (self.__terminate, None)
 
                     # Create new connection
-                    self.__msg_socket = self.__msg_context.socket(self.__msg_pattern)
-                    if isinstance(self.__connection_address, list):
-                        for _connection in self.__connection_address:
-                            self.__msg_socket.connect(_connection)
                     else:
-                        # handle SSH tunneling if enabled
-                        if self.__ssh_tunnel_mode:
-                            # establish tunnel connection
-                            ssh.tunnel_connection(
-                                self.__msg_socket,
-                                self.__connection_address,
-                                self.__ssh_tunnel_mode,
-                                keyfile=self.__ssh_tunnel_keyfile,
-                                password=self.__ssh_tunnel_pwd,
-                                paramiko=self.__paramiko_present,
-                            )
+                        self.__msg_socket = self.__msg_context.socket(self.__msg_pattern)
+                        if isinstance(self.__connection_address, list):
+                            for _connection in self.__connection_address:
+                                self.__msg_socket.connect(_connection)
                         else:
-                            # connect normally
-                            self.__msg_socket.connect(self.__connection_address)
-                    self.__poll.register(self.__msg_socket, zmq.POLLIN)
-                    # return None for mean-time
-                    return None
+                            # handle SSH tunneling if enabled
+                            if self.__ssh_tunnel_mode:
+                                # establish tunnel connection
+                                ssh.tunnel_connection(
+                                    self.__msg_socket,
+                                    self.__connection_address,
+                                    self.__ssh_tunnel_mode,
+                                    keyfile=self.__ssh_tunnel_keyfile,
+                                    password=self.__ssh_tunnel_pwd,
+                                    paramiko=self.__paramiko_present,
+                                )
+                            else:
+                                # connect normally
+                                self.__msg_socket.connect(self.__connection_address)
+                        self.__poll.register(self.__msg_socket, zmq.POLLIN)
+                        # return None for mean-time
+                        return None
 
                 # save the unique port addresses
                 if (
@@ -1465,9 +1480,9 @@ class NetGear:
                     recvd_data = recv_json["data"]
 
                 return (
-                    (recv_json["port"], recvd_data)
+                    (self.__terminate, recv_json["port"], recvd_data)
                     if self.__multiclient_mode
-                    else recvd_data
+                    else (self.__terminate, recvd_data)
                 )
             else:
                 # otherwise log normally

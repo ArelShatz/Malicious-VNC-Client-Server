@@ -30,6 +30,9 @@ import logging as log
 from threading import Thread, Event
 from collections import deque, OrderedDict
 import mss.windows
+from win32gui import GetCursorInfo, GetDC, DestroyIcon, DeleteObject
+from win32ui import CreateDCFromHandle, CreateBitmap
+from PIL import Image
 mss.windows.CAPTUREBLT = 0
 
 # import helper packages
@@ -78,6 +81,7 @@ class ScreenGear:
         # enable logging if specified:
         self.__logging = logging if isinstance(logging, bool) else False
 
+        self.minFrameDelta = 0.041666
 
         # create monitor instance for the user-defined monitor
         self.__monitor_instance = None
@@ -232,9 +236,54 @@ class ScreenGear:
 
             try:
                 if self.__monitor_instance:
-                    frame = np.asanyarray(
-                        self.__capture_object.grab(self.__mss_capture_instance)
-                    )
+                    with mss() as self.__capture_object:
+                        frame = np.asanyarray(
+                            self.__capture_object.grab(self.__mss_capture_instance)
+                        )
+                        #get cursor image
+                        flags, hcursor, (cx,cy) = GetCursorInfo()
+                        hdc = CreateDCFromHandle(GetDC(0))
+                        hbmp = CreateBitmap()
+                        hbmp.CreateCompatibleBitmap(hdc, 36, 36)
+                        hdc = hdc.CreateCompatibleDC()
+                        hdc.SelectObject(hbmp)
+                        try:
+                            hdc.DrawIcon((0,0), hcursor)
+                            DestroyIcon(hcursor)
+
+                        except:
+                            pass
+
+                        bmpinfo = hbmp.GetInfo()
+                        bmpbytes = hbmp.GetBitmapBits()
+                        bmpstr = hbmp.GetBitmapBits(True)
+                        cursor_img = np.array(Image.frombuffer(
+                            'RGB',
+                             (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                             bmpstr, 'raw', 'BGRX', 0, 1).convert('RGBA'))
+                        DeleteObject(hbmp.GetHandle())
+                        hdc.DeleteDC()
+
+                        scnWidth = self.__mss_capture_instance["width"]
+                        scnHeight = self.__mss_capture_instance["height"]
+                        if cx+36 > scnWidth:
+                            bx = scnWidth
+                            ax = scnWidth-cx
+
+                        else:
+                            bx = cx+36
+                            ax = 36
+
+                        if cy+36 > scnHeight:
+                            by = scnHeight
+                            ay = scnHeight-cy
+
+                        else:
+                            by = cy+36
+                            ay = 36
+
+                        frame[cy:by, cx:bx] = cv2.bitwise_or(frame[cy:by, cx:bx], cursor_img[:ay, :ax])
+
                 else:
                     frame = np.asanyarray(
                         self.__capture_object.grab(
@@ -285,7 +334,7 @@ class ScreenGear:
             self.__queue.put(self.frame)
 
 
-            halt(minFrameDelta - (perf_counter() - frameStart))
+            halt(self.minFrameDelta - (perf_counter() - frameStart))
 
         # finally release mss resources
         if self.__monitor_instance:

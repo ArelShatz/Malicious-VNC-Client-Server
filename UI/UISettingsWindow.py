@@ -19,7 +19,6 @@ class UISettingsWin(QWidget):
         self.horizontalLayout.addWidget(self.themeCombo)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.horizontalLayout = QHBoxLayout()
         self.fpsRadio = QRadioButton("show stream fps")
         self.fpsRadio.setChecked(self.mainWin.settingsDict["showFps"])
         self.verticalLayout.addWidget(self.fpsRadio)

@@ -7,7 +7,11 @@ from pynput.mouse import Button, Listener as mouseListener
 
 
 class Listener():
-    def __init__(self):
+    def __init__(self, grabKeyInput=False, grabMouseInput=False, blockInput=False):
+        self.grabKeyInput = grabKeyInput
+        self.grabMouseInput = grabMouseInput
+        self.blockInput = blockInput
+
         self.__queue = deque(maxlen=1024)
         self.__keyboardListener = keyboardListener(
 		on_press=self.onPress,
@@ -44,8 +48,8 @@ class Listener():
 
     #keyboard callbacks
     def onPress(self, key):
-        if key == Key.esc:
-            return False
+        if not self.grabKeyInput:
+            return
 
         if len(self.__queue) != self.__queue.maxlen:
             if isinstance(key, Key):
@@ -55,6 +59,9 @@ class Listener():
 
 
     def onRelease(self, key):
+        if not self.grabKeyInput:
+            return
+
         if len(self.__queue) != self.__queue.maxlen:
             if isinstance(key, Key):
                 self.__queue.append(("R", key.value.vk))
@@ -63,7 +70,7 @@ class Listener():
 
 
     def win32_keyBlock(self, msg, data):
-        if data.vkCode != 0x1B:
+        if self.blockInput:
             self.__keyboardListener._suppress = True
 
         else:
@@ -74,15 +81,24 @@ class Listener():
 
     #mouse callbacks
     def onMove(self, x, y):
+        if not self.grabMouseInput:
+            return
+
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("M", x, y))
 
 
     def onClick(self, x, y, button, pressed):
+        if not self.grabMouseInput:
+            return
+
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("C", x, y, button.value, pressed))
 
 
     def onScroll(self, x, y, dx, dy):
+        if not self.grabMouseInput:
+            return
+
         if len(self.__queue) != self.__queue.maxlen:
             self.__queue.append(("S", x, y, dx, dy))

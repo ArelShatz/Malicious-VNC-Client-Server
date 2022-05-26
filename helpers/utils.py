@@ -1,7 +1,7 @@
 from time import perf_counter, sleep
+from collections import deque
 
 
-minFrameDelta = 0.041666
 estimate = 0.01
 
 def SpinLock(seconds):

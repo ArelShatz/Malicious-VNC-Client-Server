@@ -4,6 +4,8 @@ import cv2
 from time import perf_counter
 from threading import Thread
 from PyQt5.QtCore import pyqtSignal
+from win32api import MapVirtualKey
+from collections import deque
 
 
 class Client():
@@ -37,8 +39,6 @@ class Client():
         #listener = Listener()
         #listener.start()
 
-        counter = 0
-        frames = 0
         while self.__running:
             frameStart = perf_counter()
             #instructionQueue = listener.fetch()
@@ -50,12 +50,19 @@ class Client():
             #print(frame.size)
             #cv2.imshow("Output Frame", frame)
             #cv2.waitKey(1)
-            self.win.label.updated.emit(frame)
-            counter += 1
+            if frame:
+                self.win.label.updated.emit(frame)
 
-            frameEnd = perf_counter()
+            if data is not None:
+                data = deque(data)
+                while data:
+                    item = data.popleft()
+                    if item[0] == "P":
+                        ASCII = MapVirtualKey(item[1], MAPVK_VK_TO_CHAR)
+                        self.win.logger.write(ch(ASCII))
+
+                
             #halt(minFrameDelta - (frameEnd - frameStart))
-            frames += perf_counter() - frameStart
             #print(1/ (frameWaitPeriodEnd - frameStart))
 
 
@@ -63,4 +70,3 @@ class Client():
         #listener.stop()
         self.__running = False
         self.client.close()
-

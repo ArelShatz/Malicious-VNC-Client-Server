@@ -11,6 +11,7 @@ class DisplayBuffer(QLabel):
         def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.setHidden(False)
+                self.cursorHidden = True
                 #self.resize(100, 100)
                 self.blank = cvtColor(zeros((100, 100), dtype=uint8), 8)
                 #self.updateBuffer(self.blank)
@@ -28,6 +29,7 @@ class DisplayBuffer(QLabel):
                 self.setPixmap(QPixmap.fromImage(qImg))
                 #self.pixmap = QPixmap.fromImage(qImg)
                 #self.repaint()
+                self.setCursor(Qt.BlankCursor)
 
 
         """def paintEvent(self, event):
@@ -44,3 +46,13 @@ class DisplayBuffer(QLabel):
 
         def drawBlank(self):
         	self.updateBuffer(self.blank)
+                self.updateBuffer(self.blank)
+
+
+
+        def toggleCursor(self, focused):
+                if focused:
+                        self.setCursor(Qt.BlankCursor)
+
+                else:
+                        self.setCursor(Qt.ArrowCursor)

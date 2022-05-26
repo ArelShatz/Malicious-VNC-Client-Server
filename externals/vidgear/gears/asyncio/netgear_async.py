@@ -20,6 +20,7 @@ limitations under the License.
 # import the necessary packages
 import cv2
 import sys
+import zlib
 import numpy as np
 import asyncio
 import inspect
@@ -525,11 +526,20 @@ class NetGear_Async:
                         fastdct=self.__jpeg_compression_fastdct,
                     )
 
+            if self.__rle_compression:
+                frame = zlib.compress(frame, self.__rle_compression__strength)
+
             # create data dict
             data_dict = dict(
                 terminate=False,
                 bi_mode=self.__bi_mode,
                 data=data if not (data is None) else "",
+                rle=self.__rle_compression,
+                compression=dict(
+                    colorspace=self.__jpeg_compression_colorspace,
+                    dct=self.__jpeg_compression_fastdct,
+                    ups=self.__jpeg_compression_fastupsample,
+                ) if self.__jpeg_compression else None
             )
             # encode it
             data_enc = msgpack.packb(data_dict)
@@ -539,7 +549,7 @@ class NetGear_Async:
             # encode frame
             frame_enc = msgpack.packb(frame, default=m.encode)
             # send the encoded frame
-            await self.__msg_socket.send_multipart([frame_enc])
+            await self.__msg_socket.send_multipart([frame_enc], flags=zmq.DONTWAIT)
 
             # check if bidirectional patterns used
             if self.__msg_pattern < 2:
@@ -579,6 +589,7 @@ class NetGear_Async:
                     )
                     if self.__logging:
                         logger.debug(recv_confirmation)
+
 
     async def recv_generator(self):
         """
@@ -714,6 +725,7 @@ class NetGear_Async:
                             if not (return_data is None)
                             else "",
                         )
+
                         # encode it
                         retdata_enc = msgpack.packb(return_dict)
                         # send it over network to server
