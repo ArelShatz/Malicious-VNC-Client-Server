@@ -31,7 +31,7 @@ class Client():
             **options
         )
 
-        self.writer = WriteGear(output_filename=self.win.settingsDict["outputFile"])
+        self.writer = WriteGear(output_filename=self.win.settingsDict["outputFile"], compression_mode=False)
         self.__running = True
 
 
