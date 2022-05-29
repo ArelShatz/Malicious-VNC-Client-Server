@@ -20,9 +20,10 @@ class Client():
             "max_retries": 1
             }
 
+        self.addr = gethostbyname(gethostname())
         self.client = NetGear(
             receive_mode=True,
-            address=gethostbyname(gethostname()),
+            address=self.addr,
             port="5900",
             protocol="tcp",
             pattern=1,

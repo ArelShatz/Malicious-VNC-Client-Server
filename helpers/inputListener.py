@@ -1,7 +1,6 @@
 from collections import deque
 from sys import path as sysPath
 
-sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 from pynput.keyboard import Key, Listener as keyboardListener
 from pynput.mouse import Button, Listener as mouseListener
 

