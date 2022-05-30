@@ -6,11 +6,11 @@ from pynput.mouse import Button, Listener as mouseListener
 
 
 class Listener():
-    def __init__(self, grabKeyInput=False, grabMouseInput=False, blockInput=False, return_char=False):
+    def __init__(self, grabKeyInput=False, grabMouseInput=False, blockInput=False, returnChar=False):
         self.grabKeyInput = grabKeyInput
         self.grabMouseInput = grabMouseInput
         self.blockInput = blockInput
-        self.return_char = return_char
+        self.returnChar = returnChar
 
         self.__queue = deque(maxlen=1024)
         self.keyboardListener = keyboardListener(
@@ -53,7 +53,7 @@ class Listener():
             return
 
         if len(self.__queue) != self.__queue.maxlen:
-            if self.return_char:
+            if self.returnChar:
                 if isinstance(key, Key):
                     self.__queue.append(("P", key.value.char))
                 else:
@@ -71,7 +71,7 @@ class Listener():
             return
 
         if len(self.__queue) != self.__queue.maxlen:
-            if self.return_char:
+            if self.returnChar:
                 if isinstance(key, Key):
                     self.__queue.append(("R", key.value.char))
                 else:
