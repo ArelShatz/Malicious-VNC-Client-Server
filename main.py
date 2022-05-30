@@ -247,9 +247,8 @@ class Window(QMainWindow, Ui_MainWindow):
         self.menuMalicious.menuAction().setVisible(False)
         self.menuRecord.menuAction().setEnabled(False)
         self.action_Save_To.setEnabled(False)
-        if self.rec:
-            self.rec = False
-            self.logger.info("stopped recording")
+        self.on_action_Stop_Recording_triggered()
+        self.on_action_Stop_KeyLogger_triggered()
         self.label.updateBuffer([[cvtColor(zeros((900, 1200), uint8), 8), (0, 0, 1200, 900)]])
         self.logger.info(f"session closed at {self.client.addr}\n")
 

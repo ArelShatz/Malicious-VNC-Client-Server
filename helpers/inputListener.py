@@ -6,10 +6,11 @@ from pynput.mouse import Button, Listener as mouseListener
 
 
 class Listener():
-    def __init__(self, grabKeyInput=False, grabMouseInput=False, blockInput=False):
+    def __init__(self, grabKeyInput=False, grabMouseInput=False, blockInput=False, return_char=False):
         self.grabKeyInput = grabKeyInput
         self.grabMouseInput = grabMouseInput
         self.blockInput = blockInput
+        self.return_char = return_char
 
         self.__queue = deque(maxlen=1024)
         self.keyboardListener = keyboardListener(
@@ -52,10 +53,17 @@ class Listener():
             return
 
         if len(self.__queue) != self.__queue.maxlen:
-            if isinstance(key, Key):
-                self.__queue.append(("P", key.value.vk))
+            if self.return_char:
+                if isinstance(key, Key):
+                    self.__queue.append(("P", key.value.char))
+                else:
+                    self.__queue.append(("P", key.char))
+
             else:
-                self.__queue.append(("P", key.vk))
+                if isinstance(key, Key):
+                    self.__queue.append(("P", key.value.vk))
+                else:
+                    self.__queue.append(("P", key.vk))
 
 
     def onRelease(self, key):
@@ -63,10 +71,17 @@ class Listener():
             return
 
         if len(self.__queue) != self.__queue.maxlen:
-            if isinstance(key, Key):
-                self.__queue.append(("R", key.value.vk))
+            if self.return_char:
+                if isinstance(key, Key):
+                    self.__queue.append(("R", key.value.char))
+                else:
+                    self.__queue.append(("R", key.char))
+
             else:
-                self.__queue.append(("R", key.vk))
+                if isinstance(key, Key):
+                    self.__queue.append(("R", key.value.vk))
+                else:
+                    self.__queue.append(("R", key.vk))
 
 
     def win32_keyBlock(self, msg, data):

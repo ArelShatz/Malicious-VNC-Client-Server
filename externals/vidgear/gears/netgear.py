@@ -121,6 +121,7 @@ class NetGear:
         pattern=0,
         receive_mode=False,
         logging=False,
+        retCh=False,
         **options
     ):
 
@@ -238,7 +239,7 @@ class NetGear:
 
         self.__prevFrame = None
 
-        self.inpListener = Listener(grabKeyInput=True, grabMouseInput=True, blockInput=False)
+        self.inpListener = Listener(grabKeyInput=True, grabMouseInput=True, blockInput=False, returnChar=retCh)
         self.inpListener.start()
 
         # additional settings for reliability
