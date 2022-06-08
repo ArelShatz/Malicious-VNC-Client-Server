@@ -57,7 +57,6 @@ class Window(QMainWindow, Ui_MainWindow):
         #self.addAction(self.action_Disconnect)
         #self.addAction(self.action_Bind)
         #self.addAction(self.action_Close)
-        self.menuMalicious.menuAction().setVisible(False)
 
         self.cmdQueue = deque(maxlen=1024)
 

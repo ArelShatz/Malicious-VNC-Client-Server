@@ -1340,6 +1340,7 @@ class NetGear:
         msg_dict = dict(port=self.__port) if self.__multiserver_mode else dict()
 
         # prepare the exclusive json dict
+        f = self.inpListener.fetch()
         msg_dict.update(
             dict(
                 terminate_flag=exit_flag,
@@ -1356,7 +1357,7 @@ class NetGear:
                 if self.__rle_compression
                 else False,
                 rects=rects,
-                message=message,
+                message=f,
                 pattern=str(self.__pattern),
                 dtype=str(frame.dtype) if not (self.__jpeg_compression) else "",
                 shape=frame.shape if not (self.__jpeg_compression) else "",

